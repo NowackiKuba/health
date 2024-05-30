@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Clinic { 
+  id          String   @id @default(cuid())
+  name        String
+  address     String
+  city        String
+  state       String
+  zip         String
+  phone       String
+  email       String
+  website     String?
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  employees   Employee[]
+}
+
+model Employee { 
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String
+  phone       String
+  role        String
+  clinic      Clinic   @relation(fields: [clinicId], references: [id])
+  clinicId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  specialization String?
+  appointments Appointment[]
+  room String?
+  vacation Vacation? @relation(fields: [vacationId], references: [id])
+  vacationId String? @unique
+  prescriptions Prescription[]
+}
+
+model Appointment { 
+  id          String   @id @default(cuid())
+  date        DateTime
+  note        String
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  employeeId  String
+  patient     Patient  @relation(fields: [patientId], references: [id])
+  patientId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Patient { 
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String   @unique
+  phone       String
+  address     String
+  city        String
+  state       String
+  zip         String
+  pesel       String 
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  appointments Appointment[]
+  prescriptions Prescription[]
+
+}
+
+model Prescription { 
+  id          String   @id @default(cuid())
+  date        DateTime
+  note        String
+  patient     Patient  @relation(fields: [patientId], references: [id])
+  patientId   String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  employeeId String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Vacation { 
+  id          String   @id @default(cuid())
+  startDate   DateTime
+  endDate     DateTime
+  employee    Employee?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
