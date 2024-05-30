@@ -13,6 +13,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role { 
+  ADMIN
+  DOCTOR
+  RECEPTIONIST
+}
 
 model Clinic { 
   id          String   @id @default(cuid())
@@ -22,9 +27,10 @@ model Clinic {
   state       String
   zip         String
   phone       String
+  logoUrl     String?
   email       String
   website     String?
-  description String
+  description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   employees   Employee[]
@@ -34,19 +40,33 @@ model Employee {
   id          String   @id @default(cuid())
   firstName   String
   lastName    String
-  email       String
+  email       String @unique
   phone       String
-  role        String
+  role        Role
   clinic      Clinic   @relation(fields: [clinicId], references: [id])
+  password    String
   clinicId    String
+  imgUrl      String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  specialization String?
+  specialization Specialization[]
   appointments Appointment[]
   room String?
   vacation Vacation? @relation(fields: [vacationId], references: [id])
   vacationId String? @unique
   prescriptions Prescription[]
+  hideDock Boolean @default(false)
+}
+
+
+model Specialization { 
+  id          String   @id @default(cuid())
+  name        String
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  employeeId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
 }
 
 model Appointment { 
