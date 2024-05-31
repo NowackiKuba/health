@@ -147,3 +147,20 @@ export const createPatientAccount: RequestHandler = async (req, res, next) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+export const getClinicEmployees: RequestHandler = async (req, res, next) => {
+  try {
+    const { clinicId } = req.params;
+
+    const employees = await db.employee.findMany({
+      where: {
+        clinicId,
+      },
+    });
+
+    return res.status(200).json({ employees });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};

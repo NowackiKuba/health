@@ -50,3 +50,15 @@ export const createPatientAccount = async ({
 
   return res.data.patient;
 };
+
+export const getClinicEmployees = async () => {
+  const user = await getCurrentUser();
+
+  const res = await axios.get(
+    `http://localhost:8080/api/clinic/get-employees/${user?.clinicId}`
+  );
+
+  const employees = (await res.data.employees) as TEmployee[];
+  const isNext = false;
+  return { employees, isNext };
+};
