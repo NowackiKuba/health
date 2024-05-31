@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.route.ts';
 import userRoutes from './routes/user.route.ts';
+import clinicRoutes from './routes/clinic.route.ts';
+import patientRoutes from './routes/patient.route.ts';
 dotenv.config();
 
 const app = express();
@@ -20,6 +22,8 @@ app.use(cors(corsOptions));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/clinic', clinicRoutes);
+app.use('/api/patient', patientRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

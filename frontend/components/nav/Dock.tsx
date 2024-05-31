@@ -48,8 +48,8 @@ const Dock = () => {
           </div>
         </div>
       ) : (
-        <div className='w-full px-44 pb-3'>
-          <div className='w-full bg-black/10 dark:bg-gray-200/10 rounded-full py-1 flex items-center justify-center gap-12'>
+        <div className='absolute z-10 sm:flex hidden w-full xl:px-16 lg:px-20 md:px-8 pb-3 sm:px-2'>
+          <div className='w-full bg-black/10 dark:bg-gray-200/10 rounded-full py-1 flex items-center justify-center md:gap-5 lg:gap-12 sm:gap-4'>
             {dockLinks.map((link) => {
               const Icon = link.icon;
               return (
@@ -60,7 +60,7 @@ const Dock = () => {
                         <Icon
                           className={`${
                             pathname === link.path ? 'scale-[1.25]' : ''
-                          } h-14 w-14 hover:scale-[1.25] duration-100 ease-linear`}
+                          } sm:h-[44px] sm:w-[44px] md:h-10 lg:h-14 md:w-10 lg:w-14 hover:scale-[1.25] duration-100 ease-linear`}
                         />
                       </TooltipTrigger>
                       <TooltipContent>{link.name}</TooltipContent>

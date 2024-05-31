@@ -9,6 +9,9 @@ export const getCurrentUser: RequestHandler = async (req, res, next) => {
       where: {
         id,
       },
+      include: {
+        clinic: true,
+      },
     });
 
     return res.status(200).json({ user });

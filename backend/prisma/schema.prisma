@@ -34,6 +34,8 @@ model Clinic {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   employees   Employee[]
+  patients    Patient[]
+  safeDataCode String? @default(cuid())
 }
 
 model Employee { 
@@ -56,6 +58,7 @@ model Employee {
   vacationId String? @unique
   prescriptions Prescription[]
   hideDock Boolean @default(false)
+  tasks Task[]
 }
 
 
@@ -86,16 +89,17 @@ model Patient {
   firstName   String
   lastName    String
   email       String   @unique
-  phone       String
-  address     String
-  city        String
-  state       String
-  zip         String
+  phone       String?
+  address     String?
+  city        String?
+  state       String?
+  zip         String?
   pesel       String 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   appointments Appointment[]
   prescriptions Prescription[]
+  clinics Clinic[]
 
 }
 
@@ -118,4 +122,15 @@ model Vacation {
   employee    Employee?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Task { 
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  done        Boolean
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  assignedTo  Employee @relation(fields: [assignedToId], references: [id])
+  assignedToId String
 }
