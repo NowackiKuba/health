@@ -62,3 +62,12 @@ export const getClinicEmployees = async () => {
   const isNext = false;
   return { employees, isNext };
 };
+
+export const getCurrentClinic = async (): Promise<TClinic> => {
+  const user = await getCurrentUser();
+  const res = await axios.get(
+    `http://localhost:8080/api/clinic/get-current-clinic/${user?.clinicId}`
+  );
+
+  return res.data.clinic;
+};

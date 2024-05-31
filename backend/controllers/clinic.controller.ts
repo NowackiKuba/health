@@ -164,3 +164,24 @@ export const getClinicEmployees: RequestHandler = async (req, res, next) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+export const getCurrentClinic: RequestHandler = async (req, res, next) => {
+  try {
+    const { clinicId } = req.params;
+
+    const clinic = await db.clinic.findFirst({
+      where: {
+        id: clinicId,
+      },
+      include: {
+        employees: true,
+        patients: true,
+      },
+    });
+
+    return res.status(200).json({ clinic });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};

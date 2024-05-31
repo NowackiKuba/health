@@ -28,9 +28,14 @@ import {
 } from '../ui/dropdown-menu';
 import { useQuery } from '@tanstack/react-query';
 import { getClinicEmployees } from '@/actions/clinic.actions';
+import EditEmployeeDialog from '../dialogs/EditEmployeeDialog';
+import EmployeeDetailsDialog from '../dialogs/EmployeeDetailsDialog';
 
 const EmployeesPage = () => {
   const [isOpenCreate, setIsOpenCreate] = useState<boolean>(false);
+  const [isOpenEdit, setIsOpenEdit] = useState<boolean>(false);
+  const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('');
   const { data, isLoading } = useQuery({
     queryKey: ['getClinicEmployees'],
     queryFn: async () => await getClinicEmployees(),
@@ -95,20 +100,20 @@ const EmployeesPage = () => {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
                         <DropdownMenuItem
-                          //   onClick={() => {
-                          //     setSelectedPatientId(patient.id);
-                          //     setIsOpenEdit(true);
-                          //   }}
+                          onClick={() => {
+                            setSelectedEmployeeId(employee.id);
+                            setIsOpenEdit(true);
+                          }}
                           className='flex cursor-pointer hover:text-current items-center gap-2 text-sm'
                         >
                           <Edit className='h-4 w-4' />
                           <p>Edit Employee</p>
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          //   onClick={() => {
-                          //     setSelectedPatientId(patient.id);
-                          //     setIsOpenDetails(true);
-                          //   }}
+                          onClick={() => {
+                            setSelectedEmployeeId(employee.id);
+                            setIsOpenDetails(true);
+                          }}
                           className='flex cursor-pointer hover:text-current items-center gap-2 text-sm'
                         >
                           <Eye className='h-4 w-4' />
@@ -156,6 +161,16 @@ const EmployeesPage = () => {
         )}
       </div>
       <CreateEmployeeDialog open={isOpenCreate} setOpen={setIsOpenCreate} />
+      <EditEmployeeDialog
+        open={isOpenEdit}
+        employeeId={selectedEmployeeId}
+        setOpen={setIsOpenEdit}
+      />
+      <EmployeeDetailsDialog
+        employeeId={selectedEmployeeId}
+        open={isOpenDetails}
+        setOpen={setIsOpenDetails}
+      />
     </div>
   );
 };

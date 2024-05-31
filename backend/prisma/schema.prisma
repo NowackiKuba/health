@@ -35,6 +35,7 @@ model Clinic {
   updatedAt   DateTime @updatedAt
   employees   Employee[]
   patients    Patient[]
+  appointments Appointment[]
   safeDataCode String? @default(cuid())
 }
 
@@ -75,13 +76,18 @@ model Specialization {
 model Appointment { 
   id          String   @id @default(cuid())
   date        DateTime
-  note        String
+  note        String?
+  appointmentType String
+  appointmentReason String
+  appointmentReport String?
   employee    Employee @relation(fields: [employeeId], references: [id])
   employeeId  String
   patient     Patient  @relation(fields: [patientId], references: [id])
   patientId   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  clinic     Clinic   @relation(fields: [clinicId], references: [id])
+  clinicId   String
 }
 
 model Patient { 
@@ -95,6 +101,7 @@ model Patient {
   state       String?
   zip         String?
   pesel       String 
+  chronicDiseases String[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   appointments Appointment[]

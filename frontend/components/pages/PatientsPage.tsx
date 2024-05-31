@@ -40,15 +40,16 @@ import { deletePatient } from '@/actions/patient.actions';
 import { toast } from '../ui/use-toast';
 import { FcExport, FcImport } from 'react-icons/fc';
 import { useUser } from '@/hooks/useUser';
+import CreateAppointmentDialog from '../dialogs/CreateAppointmentDialog';
 
 const PatientsPage = () => {
   const searchParams = useSearchParams();
-
+  const [isOpenCreateAppointment, setIsOpenCreateAppointment] =
+    useState<boolean>(false);
   const [isOpenEdit, setIsOpenEdit] = useState<boolean>(false);
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
   const [selectedPatientId, setSelectedPatientId] = useState<string>('');
   const { user, isLoading: isLoadingUser } = useUser();
-  const [clinicDoctors, setClinicDoctors] = useState<TEmployee[]>([]);
   const { data, isLoading } = useQuery({
     queryKey: [
       'getPatients',
@@ -93,6 +94,10 @@ const PatientsPage = () => {
       });
     },
   });
+
+  if (isLoading) {
+    return <p>...loading</p>;
+  }
   return (
     <div className='flex flex-col gap-4 w-full'>
       <div className='flex items-center justify-between w-full'>
@@ -206,14 +211,7 @@ const PatientsPage = () => {
                         <DropdownMenuItem
                           onClick={() => {
                             setSelectedPatientId(patient.id);
-                            // setIsOpenDetails(true);
-                            setClinicDoctors(
-                              user?.clinic?.employees.filter(
-                                (employee) =>
-                                  employee.role.toString().toLowerCase() ===
-                                  'doctor'
-                              ) || []
-                            );
+                            setIsOpenCreateAppointment(true);
                           }}
                           className='flex cursor-pointer hover:text-current items-center gap-2 text-sm'
                         >
@@ -261,6 +259,11 @@ const PatientsPage = () => {
       <PatientDetailsDialog
         open={isOpenDetails}
         setOpen={setIsOpenDetails}
+        patientId={selectedPatientId}
+      />
+      <CreateAppointmentDialog
+        open={isOpenCreateAppointment}
+        setOpen={setIsOpenCreateAppointment}
         patientId={selectedPatientId}
       />
     </div>

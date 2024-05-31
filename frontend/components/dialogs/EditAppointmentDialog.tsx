@@ -2,6 +2,7 @@ import React, {
   Dispatch,
   DispatchWithoutAction,
   SetStateAction,
+  useEffect,
   useState,
 } from 'react';
 import { Dialog, DialogContent } from '../ui/dialog';
@@ -18,65 +19,72 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import { CalendarIcon } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, set } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import { Textarea } from '../ui/textarea';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createAppointment } from '@/actions/appointment.action';
+import {
+  createAppointment,
+  editAppointment,
+} from '@/actions/appointment.action';
 import { toast } from '../ui/use-toast';
 import ButtonLoading from '../ButtonLoading';
 import { getCurrentClinic } from '@/actions/clinic.actions';
-import CreatePatientDialog from './CreatePatientDialog';
 
 interface Props {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
-  patientId?: string;
+  appointment: TAppointment;
 }
 
-const CreateAppointmentDialog = ({ open, setOpen, patientId }: Props) => {
-  const [isOpenCreatePatient, setIsOpenCreatePatient] =
-    useState<boolean>(false);
+const EditAppointmentDialog = ({ open, setOpen, appointment }: Props) => {
   const [selectedDoctorId, setSelectedDoctorId] = useState<string>('');
   const [date, setDate] = useState<Date>();
   const [hour, setHour] = useState<string>('');
   const [note, setNote] = useState<string>('');
   const [appointmentType, setAppointmentType] = useState<string>('');
   const [appointmentReason, setAppointmentReason] = useState<string>('');
-  const [selectedPatient, setSelectedPatient] = useState<string>(
-    patientId ? patientId : ''
-  );
+  const [selectedPatient, setSelectedPatient] = useState<string>('');
 
+  useEffect(() => {
+    if (!appointment) return;
+    setSelectedDoctorId(appointment.employeeId);
+    setDate(appointment.date);
+    setHour(new Date(appointment.date).toTimeString().split(' ')[0]);
+    setNote(appointment.note);
+    setAppointmentType(appointment.appointmentType);
+    setAppointmentReason(appointment.appointmentReason);
+    setSelectedPatient(appointment.patientId);
+  }, [appointment]);
+  console.log('hour', hour);
+  const queryClient = useQueryClient();
+  const { mutate: handleEditAppointment, isPending: isEditing } = useMutation({
+    mutationKey: ['editAppointment'],
+    mutationFn: editAppointment,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['getClinicAppointments'],
+        refetchType: 'all',
+      });
+      setOpen(false);
+      toast({
+        title: 'Successfully updated appointment',
+        duration: 1500,
+      });
+    },
+    onError: () => {
+      toast({
+        title: 'Something went wrong while updating appointment',
+        description: 'Please try again later',
+        duration: 1500,
+        variant: 'destructive',
+      });
+    },
+  });
   const { data: clinic } = useQuery({
     queryKey: ['getCurrentClinic'],
     queryFn: async () => await getCurrentClinic(),
   });
-
-  const queryClient = useQueryClient();
-  const { mutate: handleCreateAppointment, isPending: isCreating } =
-    useMutation({
-      mutationKey: ['createAppointment'],
-      mutationFn: createAppointment,
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ['getClinicAppointments'],
-          refetchType: 'all',
-        });
-        setOpen(false);
-        toast({
-          title: 'Successfully created appointment',
-          duration: 1500,
-        });
-      },
-      onError: () => {
-        toast({
-          title: 'Something went wrong while creating appointment',
-          description: 'Please try again later',
-          duration: 1500,
-          variant: 'destructive',
-        });
-      },
-    });
   return (
     <Dialog
       open={open}
@@ -87,10 +95,12 @@ const CreateAppointmentDialog = ({ open, setOpen, patientId }: Props) => {
       }}
     >
       <DialogContent className='flex flex-col items-start justify-start w-full gap-5'>
-        <p className='text-xl font-semibold'>Create Appointment</p>
         <div className='flex flex-col gap-0.5 w-full'>
           <Label>Appointment Type</Label>
-          <Select onValueChange={(e) => setAppointmentType(e)}>
+          <Select
+            defaultValue={appointmentType}
+            onValueChange={(e) => setAppointmentType(e)}
+          >
             <SelectTrigger>
               <SelectValue placeholder='Select appointment type' />
             </SelectTrigger>
@@ -102,7 +112,10 @@ const CreateAppointmentDialog = ({ open, setOpen, patientId }: Props) => {
         </div>
         <div className='flex flex-col gap-0.5 w-full'>
           <Label>Appointment Reason</Label>
-          <Input onChange={(e) => setAppointmentReason(e.target.value)} />
+          <Input
+            onChange={(e) => setAppointmentReason(e.target.value)}
+            defaultValue={appointmentReason}
+          />
         </div>
         <div className='flex items-center gap-2 w-full'>
           <Popover>
@@ -127,11 +140,18 @@ const CreateAppointmentDialog = ({ open, setOpen, patientId }: Props) => {
               />
             </PopoverContent>
           </Popover>
-          <Input type='time' onChange={(e) => setHour(e.target.value)} />
+          <Input
+            type='time'
+            onChange={(e) => setHour(e.target.value)}
+            defaultValue={hour}
+          />
         </div>
         <div className='flex flex-col gap-0.5 w-full'>
           <Label>Doctors</Label>
-          <Select onValueChange={(e) => setSelectedDoctorId(e)}>
+          <Select
+            defaultValue={selectedDoctorId}
+            onValueChange={(e) => setSelectedDoctorId(e)}
+          >
             <SelectTrigger>
               <SelectValue placeholder='Select Doctor' />
             </SelectTrigger>
@@ -154,14 +174,17 @@ const CreateAppointmentDialog = ({ open, setOpen, patientId }: Props) => {
         </div>
         <div className='flex flex-col gap-0.5 w-full'>
           <Label>Patients</Label>
-          <Select onValueChange={(e) => setSelectedPatient(e)}>
-            <SelectTrigger defaultValue={patientId}>
+          <Select
+            defaultValue={selectedPatient}
+            onValueChange={(e) => setSelectedPatient(e)}
+          >
+            <SelectTrigger defaultValue={selectedPatient}>
               <SelectValue
                 placeholder='Select Patient'
-                defaultValue={patientId}
+                defaultValue={selectedPatient}
               />
             </SelectTrigger>
-            <SelectContent defaultValue={patientId}>
+            <SelectContent defaultValue={selectedPatient}>
               {clinic?.patients?.map((patient) => (
                 <SelectItem key={patient.id} value={patient?.id}>
                   {patient?.firstName} {patient?.lastName}
@@ -169,19 +192,11 @@ const CreateAppointmentDialog = ({ open, setOpen, patientId }: Props) => {
               ))}
             </SelectContent>
           </Select>
-          <p className='text-xs'>
-            Patient don&apos;t have an account?{' '}
-            <span
-              className='text-primary underline cursor-pointer'
-              onClick={() => setIsOpenCreatePatient(true)}
-            >
-              Create Patient Account
-            </span>
-          </p>
         </div>
         <div className='flex flex-col gap-0.5 w-full'>
           <Label>Note (optional)</Label>
           <Textarea
+            defaultValue={note}
             onChange={(e) => setNote(e.target.value)}
             rows={5}
             className='resize-none'
@@ -193,7 +208,7 @@ const CreateAppointmentDialog = ({ open, setOpen, patientId }: Props) => {
             onClick={() => setOpen(false)}
             className='w-full'
           >
-            Cancel
+            Anuluj
           </Button>
           <Button
             onClick={() => {
@@ -201,32 +216,28 @@ const CreateAppointmentDialog = ({ open, setOpen, patientId }: Props) => {
                 new Date().setHours(+hour.split(':')[0], +hour.split(':')[1])
               );
 
-              handleCreateAppointment({
+              handleEditAppointment({
                 appointmentReason,
                 appointmentType,
                 date: today,
                 employeeId: selectedDoctorId,
                 note,
                 patientId: selectedPatient,
-                clinicId: clinic?.id!,
+                appointmentId: appointment.id,
               });
             }}
             className='w-full'
-            disabled={isCreating}
+            disabled={isEditing}
           >
             <ButtonLoading
-              isLoading={isCreating}
-              buttonText='Create Appointment'
+              isLoading={isEditing}
+              buttonText='Edit Appointment'
             />
           </Button>
         </div>
       </DialogContent>
-      <CreatePatientDialog
-        open={isOpenCreatePatient}
-        setOpen={setIsOpenCreatePatient}
-      />
     </Dialog>
   );
 };
 
-export default CreateAppointmentDialog;
+export default EditAppointmentDialog;

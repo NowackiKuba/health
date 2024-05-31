@@ -27,7 +27,9 @@ interface Clinic {
   description?: string | null;
   createdAt: Date;
   updatedAt: Date;
+  appointments: TAppointment[];
   employees: TEmployee[];
+  patients: TPatient[];
 }
 
 interface Employee {
@@ -71,6 +73,11 @@ interface Appointment {
   patientId: string;
   createdAt: Date;
   updatedAt: Date;
+  clinic: TClinic;
+  clinicId: string;
+  appointmentType: string;
+  appointmentReason: string;
+  appointmentReport: string;
 }
 
 interface Patient {

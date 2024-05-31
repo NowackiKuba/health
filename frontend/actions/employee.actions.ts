@@ -31,3 +31,48 @@ export const createEmployeeAccount = async ({
 
   return res.data;
 };
+
+export const getEmployeeById = async ({
+  employeeId,
+}: {
+  employeeId: string;
+}): Promise<TEmployee> => {
+  const res = await axios.get(
+    `http://localhost:8080/api/employee/${employeeId}`
+  );
+
+  return res.data.employee;
+};
+
+export const editEmployee = async ({
+  firstName,
+  lastName,
+  phone,
+  email,
+  imgUrl,
+  employeeId,
+  role,
+  room,
+}: {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  imgUrl: string;
+  employeeId: string;
+  role: string;
+  room: string;
+}) => {
+  const res = await axios.post('http://localhost:8080/api/employee/edit', {
+    firstName,
+    lastName,
+    phone,
+    email,
+    imgUrl,
+    employeeId,
+    role,
+    room,
+  });
+
+  return res.data;
+};
