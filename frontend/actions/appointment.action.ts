@@ -6,7 +6,7 @@ import { getCurrentUser } from './user.actions';
 export const getClinicAppointments = async (): Promise<TAppointment[]> => {
   const user = await getCurrentUser();
   const res = await axios.get(
-    `http://localhost:8080/api/appointment/get-clinic-appointments/${user?.clinicId}`
+    `http://localhost:8080/api/appointment/get-clinic-appointments/${user?.user?.clinicId}`
   );
 
   return res.data.appointments;

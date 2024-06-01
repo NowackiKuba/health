@@ -5,6 +5,10 @@ import React from 'react';
 
 const DashboardPage = () => {
   const { user, isLoading } = useUser();
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
+  console.log(user);
   return (
     <div className='w-full flex flex-col gap-2'>
       <p className='text-2xl font-semibold'>

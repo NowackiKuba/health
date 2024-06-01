@@ -3,17 +3,24 @@ import { db } from '../db/prisma';
 
 export const getCurrentUser: RequestHandler = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { userId } = req.params;
 
-    const user = await db.employee.findFirst({
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+
+    const user = await db.employee.findUnique({
       where: {
-        id,
+        id: userId,
       },
       include: {
         clinic: true,
+        appointments: true,
       },
     });
-
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
     return res.status(200).json({ user });
   } catch (error) {
     console.log(error);

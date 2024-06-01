@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   createEmployeeAccount,
+  deleteEmployee,
   editEmployee,
   getEmployeeById,
 } from '../controllers/employee.controller';
@@ -8,7 +9,8 @@ import {
 const router = express.Router();
 
 router.post('/create', createEmployeeAccount);
-router.get('/:employeeId', getEmployeeById);
 router.post('/edit', editEmployee);
+router.get('/:employeeId', getEmployeeById);
+router.delete('/delete/:employeeId', deleteEmployee);
 
 export default router;

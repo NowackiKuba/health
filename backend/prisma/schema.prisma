@@ -37,10 +37,11 @@ model Clinic {
   patients    Patient[]
   appointments Appointment[]
   safeDataCode String? @default(cuid())
+  tasks Task[]
 }
 
 model Employee { 
-  id          String   @id @default(cuid())
+  id          String   @id @default(cuid()) 
   firstName   String
   lastName    String
   email       String @unique
@@ -135,9 +136,13 @@ model Task {
   id          String   @id @default(cuid())
   title       String
   description String
-  done        Boolean
+  done        Boolean @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  deadLine    DateTime
+  priority    Int
   assignedTo  Employee @relation(fields: [assignedToId], references: [id])
   assignedToId String
+  clinic     Clinic   @relation(fields: [clinicId], references: [id])
+  clinicId   String
 }

@@ -21,7 +21,7 @@ export const createEmployeeAccount: RequestHandler = async (req, res, next) => {
         firstName,
         lastName,
         email,
-        password,
+        password: hashedPassword,
         room,
         role: role as Role,
         clinic: {
@@ -93,6 +93,23 @@ export const editEmployee: RequestHandler = async (req, res, next) => {
     return res.status(200).json({ employee });
   } catch (err) {
     console.log(err);
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+export const deleteEmployee: RequestHandler = async (req, res, next) => {
+  try {
+    const { employeeId } = req.params;
+
+    const deletedEmployeee = await db.employee.delete({
+      where: {
+        id: employeeId,
+      },
+    });
+
+    return res.status(200).json({ deletedEmployeee });
+  } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: 'Internal Server Error' });
   }
 };

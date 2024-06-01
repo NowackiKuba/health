@@ -18,7 +18,7 @@ export const getClinicPatients = async ({
   const user = await getCurrentUser();
 
   const res = await axios.get(
-    `http://localhost:8080/api/clinic/get-patients/${user?.clinicId!}?search=${search}&page=${page}&pageSize=${pageSize}&sort=${sort}`
+    `http://localhost:8080/api/clinic/get-patients/${user?.user?.clinicId}?search=${search}&page=${page}&pageSize=${pageSize}&sort=${sort}`
   );
   const patients = (await res.data.patients) as TPatient[];
   const isNext = (await res.data.isNext) as boolean;
@@ -44,7 +44,7 @@ export const createPatientAccount = async ({
       address: data.address,
       zip: data.zip,
       state: data.state,
-      clinicId: user?.clinicId,
+      clinicId: user?.user?.clinicId,
     }
   );
 
@@ -55,7 +55,7 @@ export const getClinicEmployees = async () => {
   const user = await getCurrentUser();
 
   const res = await axios.get(
-    `http://localhost:8080/api/clinic/get-employees/${user?.clinicId}`
+    `http://localhost:8080/api/clinic/get-employees/${user?.user?.clinicId}`
   );
 
   const employees = (await res.data.employees) as TEmployee[];
@@ -66,7 +66,7 @@ export const getClinicEmployees = async () => {
 export const getCurrentClinic = async (): Promise<TClinic> => {
   const user = await getCurrentUser();
   const res = await axios.get(
-    `http://localhost:8080/api/clinic/get-current-clinic/${user?.clinicId}`
+    `http://localhost:8080/api/clinic/get-current-clinic/${user?.user?.clinicId}`
   );
 
   return res.data.clinic;

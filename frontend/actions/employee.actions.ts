@@ -25,7 +25,7 @@ export const createEmployeeAccount = async ({
     email,
     password,
     role,
-    clinicId: user?.clinicId,
+    clinicId: user?.user?.clinicId,
     phone,
   });
 
@@ -73,6 +73,18 @@ export const editEmployee = async ({
     role,
     room,
   });
+
+  return res.data;
+};
+
+export const deleteEmployee = async ({
+  employeeId,
+}: {
+  employeeId: string;
+}) => {
+  const res = await axios.delete(
+    `http://localhost:8080/api/employee/delete/${employeeId}`
+  );
 
   return res.data;
 };

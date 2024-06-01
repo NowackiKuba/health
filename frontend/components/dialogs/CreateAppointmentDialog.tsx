@@ -32,12 +32,20 @@ interface Props {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
   patientId?: string;
+  doctorId?: string;
 }
 
-const CreateAppointmentDialog = ({ open, setOpen, patientId }: Props) => {
+const CreateAppointmentDialog = ({
+  open,
+  setOpen,
+  patientId,
+  doctorId,
+}: Props) => {
   const [isOpenCreatePatient, setIsOpenCreatePatient] =
     useState<boolean>(false);
-  const [selectedDoctorId, setSelectedDoctorId] = useState<string>('');
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string>(
+    doctorId ? doctorId : ''
+  );
   const [date, setDate] = useState<Date>();
   const [hour, setHour] = useState<string>('');
   const [note, setNote] = useState<string>('');
@@ -131,7 +139,10 @@ const CreateAppointmentDialog = ({ open, setOpen, patientId }: Props) => {
         </div>
         <div className='flex flex-col gap-0.5 w-full'>
           <Label>Doctors</Label>
-          <Select onValueChange={(e) => setSelectedDoctorId(e)}>
+          <Select
+            defaultValue={doctorId}
+            onValueChange={(e) => setSelectedDoctorId(e)}
+          >
             <SelectTrigger>
               <SelectValue placeholder='Select Doctor' />
             </SelectTrigger>
@@ -154,14 +165,14 @@ const CreateAppointmentDialog = ({ open, setOpen, patientId }: Props) => {
         </div>
         <div className='flex flex-col gap-0.5 w-full'>
           <Label>Patients</Label>
-          <Select onValueChange={(e) => setSelectedPatient(e)}>
-            <SelectTrigger defaultValue={patientId}>
-              <SelectValue
-                placeholder='Select Patient'
-                defaultValue={patientId}
-              />
+          <Select
+            defaultValue={doctorId}
+            onValueChange={(e) => setSelectedPatient(e)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder='Select Patient' />
             </SelectTrigger>
-            <SelectContent defaultValue={patientId}>
+            <SelectContent>
               {clinic?.patients?.map((patient) => (
                 <SelectItem key={patient.id} value={patient?.id}>
                   {patient?.firstName} {patient?.lastName}

@@ -8,7 +8,9 @@ import {
   Edit,
   Eye,
   Ghost,
+  Loader2,
   Settings,
+  Trash,
 } from 'lucide-react';
 import CreateEmployeeDialog from '../dialogs/CreateEmployeeDialog';
 import {
@@ -26,20 +28,55 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getClinicEmployees } from '@/actions/clinic.actions';
 import EditEmployeeDialog from '../dialogs/EditEmployeeDialog';
 import EmployeeDetailsDialog from '../dialogs/EmployeeDetailsDialog';
+import CreateAppointmentDialog from '../dialogs/CreateAppointmentDialog';
+import { deleteEmployee } from '@/actions/employee.actions';
+import { toast } from '../ui/use-toast';
 
 const EmployeesPage = () => {
   const [isOpenCreate, setIsOpenCreate] = useState<boolean>(false);
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string>('');
   const [isOpenEdit, setIsOpenEdit] = useState<boolean>(false);
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
+  const [isOpenCreateAppointment, setIsOpenCreateAppointment] =
+    useState<boolean>(false);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('');
   const { data, isLoading } = useQuery({
     queryKey: ['getClinicEmployees'],
     queryFn: async () => await getClinicEmployees(),
   });
+  const queryClient = useQueryClient();
+  const { mutate: deleteEmployeeMutation, isPending: isDeleting } = useMutation(
+    {
+      mutationKey: ['deleteEmployee'],
+      mutationFn: deleteEmployee,
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ['getClinicEmployees'],
+          refetchType: 'all',
+        });
+        toast({
+          title: 'Employee Successfully Deleted',
+          duration: 1500,
+        });
+      },
+      onError: () => {
+        toast({
+          title: 'Error Deleting Employee',
+          description: 'An error occurred while deleting an employee',
+          variant: 'destructive',
+          duration: 1500,
+        });
+      },
+    }
+  );
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
   return (
     <div className='flex flex-col gap-4 w-full'>
       <div className='flex items-center justify-between w-full'>
@@ -119,36 +156,34 @@ const EmployeesPage = () => {
                           <Eye className='h-4 w-4' />
                           <p>See Details</p>
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                          //   onClick={() => {
-                          //     setSelectedPatientId(patient.id);
-                          //     // setIsOpenDetails(true);
-                          //     setClinicDoctors(
-                          //       user?.clinic?.employees.filter(
-                          //         (employee) =>
-                          //           employee.role.toString().toLowerCase() ===
-                          //           'doctor'
-                          //       ) || []
-                          //     );
-                          //   }}
-                          className='flex cursor-pointer hover:text-current items-center gap-2 text-sm'
-                        >
-                          <CalendarPlus className='h-4 w-4' />
-                          <p>Create Appointment</p>
-                        </DropdownMenuItem>
+                        {employee?.role?.toString().toLowerCase() ==
+                          'doctor' && (
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setIsOpenCreateAppointment(true);
+
+                              setSelectedDoctorId(employee.id);
+                            }}
+                            className='flex cursor-pointer hover:text-current items-center gap-2 text-sm'
+                          >
+                            <CalendarPlus className='h-4 w-4' />
+                            <p>Create Appointment</p>
+                          </DropdownMenuItem>
+                        )}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className='flex cursor-pointer hover:text-current items-center gap-2 text-sm text-red-500'
-                          //   onClick={() =>
-                          //     deletePatientMutation({ patientId: patient.id })
-                          //   }
-                          //   disabled={isDeleting}
+                          onClick={() =>
+                            deleteEmployeeMutation({ employeeId: employee?.id })
+                          }
+                          disabled={isDeleting}
                         >
-                          {/* {isDeleting ? (
+                          {isDeleting ? (
                             <Loader2 className='h-4 w-4 animate-spin' />
                           ) : (
                             <Trash className='h-4 w-4' />
-                          )} */}
+                          )}
+
                           <p>Delete Employee</p>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -170,6 +205,11 @@ const EmployeesPage = () => {
         employeeId={selectedEmployeeId}
         open={isOpenDetails}
         setOpen={setIsOpenDetails}
+      />
+      <CreateAppointmentDialog
+        open={isOpenCreateAppointment}
+        setOpen={setIsOpenCreateAppointment}
+        doctorId={selectedDoctorId}
       />
     </div>
   );

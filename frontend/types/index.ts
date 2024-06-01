@@ -12,6 +12,7 @@ type TAppointment = Appointment;
 type TPatient = Patient;
 type TPrescription = Prescription;
 type TVacation = Vacation;
+type TTask = Task;
 
 interface Clinic {
   id: string;
@@ -116,4 +117,19 @@ interface Vacation {
   employee?: TEmployee | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+interface Task {
+  id: string;
+  title: string;
+  description: string;
+  done: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  deadLine: Date;
+  priority: number;
+  assignedTo: Employee;
+  assignedToId: string;
+  clinic: Clinic;
+  clinicId: string;
 }
