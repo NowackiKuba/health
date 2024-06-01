@@ -13,6 +13,7 @@ import {
   Trash,
 } from 'lucide-react';
 import CreateEmployeeDialog from '../dialogs/CreateEmployeeDialog';
+import { MdAddTask } from 'react-icons/md';
 import {
   Table,
   TableBody,
@@ -35,6 +36,7 @@ import EmployeeDetailsDialog from '../dialogs/EmployeeDetailsDialog';
 import CreateAppointmentDialog from '../dialogs/CreateAppointmentDialog';
 import { deleteEmployee } from '@/actions/employee.actions';
 import { toast } from '../ui/use-toast';
+import CreateTaskDialog from '../dialogs/CreateTaskDialog';
 
 const EmployeesPage = () => {
   const [isOpenCreate, setIsOpenCreate] = useState<boolean>(false);
@@ -43,6 +45,7 @@ const EmployeesPage = () => {
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
   const [isOpenCreateAppointment, setIsOpenCreateAppointment] =
     useState<boolean>(false);
+  const [isOpenCreateTask, setIsOpenCreateTask] = useState<boolean>(false);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('');
   const { data, isLoading } = useQuery({
     queryKey: ['getClinicEmployees'],
@@ -156,6 +159,16 @@ const EmployeesPage = () => {
                           <Eye className='h-4 w-4' />
                           <p>See Details</p>
                         </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedEmployeeId(employee.id);
+                            setIsOpenCreateTask(true);
+                          }}
+                          className='flex cursor-pointer hover:text-current items-center gap-2 text-sm'
+                        >
+                          <MdAddTask className='h-4 w-4' />
+                          <p>Add Task</p>
+                        </DropdownMenuItem>
                         {employee?.role?.toString().toLowerCase() ==
                           'doctor' && (
                           <DropdownMenuItem
@@ -210,6 +223,11 @@ const EmployeesPage = () => {
         open={isOpenCreateAppointment}
         setOpen={setIsOpenCreateAppointment}
         doctorId={selectedDoctorId}
+      />
+      <CreateTaskDialog
+        open={isOpenCreateTask}
+        setOpen={setIsOpenCreateTask}
+        employeeId={selectedEmployeeId}
       />
     </div>
   );

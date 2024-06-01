@@ -48,6 +48,9 @@ export const getEmployeeById: RequestHandler = async (req, res, next) => {
       where: {
         id: employeeId,
       },
+      include: {
+        appointments: true,
+      },
     });
 
     return res.status(200).json({ employee });

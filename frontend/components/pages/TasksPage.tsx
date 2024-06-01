@@ -9,7 +9,9 @@ import {
   Ghost,
   LayoutGrid,
   List,
+  Loader2,
   Settings,
+  Trash,
 } from 'lucide-react';
 import Searchbar from '../Searchbar';
 import QuerySelector from '../QuerySelector';
@@ -29,11 +31,14 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import CreateTaskDialog from '../dialogs/CreateTaskDialog';
-import { useQuery } from '@tanstack/react-query';
-import { getTasks } from '@/actions/task.actions';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { deleteTask, getTasks } from '@/actions/task.actions';
 import { format } from 'date-fns';
 import { getPriorityData } from '@/utils';
 import EditTaskDialog from '../dialogs/EditTaskDialog';
+import TaskDetailsDialog from '../dialogs/TaskDetailsDialog';
+import TaskCard from '../cards/TaskCard';
+import { toast } from '../ui/use-toast';
 
 const TasksPage = () => {
   const { data: tasks, isLoading } = useQuery({
@@ -43,7 +48,31 @@ const TasksPage = () => {
   const [view, setView] = useState<'list' | 'grid'>('list');
   const [isOpenCreate, setIsOpenCreate] = useState<boolean>(false);
   const [isOpenEdit, setIsOpenEdit] = useState<boolean>(false);
+  const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
   const [selectedTask, setSelectedTask] = useState<TTask>();
+  const queryClient = useQueryClient();
+  const { mutate: deleteTaskMutation, isPending: isDeleting } = useMutation({
+    mutationKey: ['deleteTask'],
+    mutationFn: deleteTask,
+    onSuccess: () => {
+      toast({
+        title: 'Successfully deleted task',
+        duration: 1500,
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['getTasks'],
+        refetchType: 'all',
+      });
+    },
+    onError: () => {
+      toast({
+        title: 'Error deleting task',
+        description: 'An error occurred while deleting task',
+        variant: 'destructive',
+        duration: 1500,
+      });
+    },
+  });
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -159,10 +188,10 @@ const TasksPage = () => {
                               <p>Edit Task</p>
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              // onClick={() => {
-                              //   setSelectedEmployeeId(employee.id);
-                              //   setIsOpenDetails(true);
-                              // }}
+                              onClick={() => {
+                                setSelectedTask(task);
+                                setIsOpenDetails(true);
+                              }}
                               className='flex cursor-pointer hover:text-current items-center gap-2 text-sm'
                             >
                               <Eye className='h-4 w-4' />
@@ -185,18 +214,18 @@ const TasksPage = () => {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               className='flex cursor-pointer hover:text-current items-center gap-2 text-sm text-red-500'
-                              // onClick={() =>
-                              //   deleteEmployeeMutation({
-                              //     employeeId: employee?.id,
-                              //   })
-                              // }
-                              // disabled={isDeleting}
+                              onClick={() =>
+                                deleteTaskMutation({
+                                  taskId: task.id,
+                                })
+                              }
+                              disabled={isDeleting}
                             >
-                              {/* {isDeleting ? (
-                              <Loader2 className='h-4 w-4 animate-spin' />
-                            ) : (
-                              <Trash className='h-4 w-4' />
-                            )} */}
+                              {isDeleting ? (
+                                <Loader2 className='h-4 w-4 animate-spin' />
+                              ) : (
+                                <Trash className='h-4 w-4' />
+                              )}
 
                               <p>Delete Task</p>
                             </DropdownMenuItem>
@@ -208,13 +237,33 @@ const TasksPage = () => {
                 })}
               </TableBody>
             </Table>
-          ) : null}
+          ) : (
+            <div className='flex items-center gap-4 w-full flex-wrap'>
+              {tasks?.map((task) => (
+                <>
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    handleDelete={deleteTaskMutation}
+                    isDeleting={isDeleting}
+                    setOpenDetails={setIsOpenDetails}
+                    setSelectedTask={setSelectedTask}
+                  />
+                </>
+              ))}
+            </div>
+          )}
         </div>
       )}
       <CreateTaskDialog open={isOpenCreate} setOpen={setIsOpenCreate} />
       <EditTaskDialog
         open={isOpenEdit}
         setOpen={setIsOpenEdit}
+        task={selectedTask!}
+      />
+      <TaskDetailsDialog
+        open={isOpenDetails}
+        setOpen={setIsOpenDetails}
         task={selectedTask!}
       />
     </div>

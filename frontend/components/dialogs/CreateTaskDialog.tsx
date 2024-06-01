@@ -1,6 +1,6 @@
 'use client';
 import useClinic from '@/hooks/useClinic';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { Dialog, DialogContent } from '../ui/dialog';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
@@ -35,9 +35,12 @@ const CreateTaskDialog = ({ open, setOpen, employeeId }: Props) => {
   const [description, setDescription] = useState<string>('');
   const [deadLine, setDeadLine] = useState<Date>();
   const [priority, setPriority] = useState<string>('');
-  const [assignedToId, setAssignedToId] = useState<string>(
-    employeeId ? employeeId : ''
-  );
+  const [assignedToId, setAssignedToId] = useState<string>('');
+
+  useEffect(() => {
+    if (!employeeId) return;
+    setAssignedToId(employeeId);
+  }, [employeeId]);
   const queryClient = useQueryClient();
   const { mutate: createTaskMutation, isPending: isCreating } = useMutation({
     mutationKey: ['createTask'],
@@ -125,7 +128,10 @@ const CreateTaskDialog = ({ open, setOpen, employeeId }: Props) => {
         </div>
         <div className='flex flex-col gap-0.5 w-full'>
           <Label>Employee</Label>
-          <Select onValueChange={(e) => setAssignedToId(e)}>
+          <Select
+            onValueChange={(e) => setAssignedToId(e)}
+            defaultValue={assignedToId}
+          >
             <SelectTrigger>
               <SelectValue placeholder='Select Employee' />
             </SelectTrigger>

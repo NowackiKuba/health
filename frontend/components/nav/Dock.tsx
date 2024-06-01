@@ -14,9 +14,17 @@ import { usePathname } from 'next/navigation';
 import { LogOut } from 'lucide-react';
 
 const Dock = () => {
-  const { user, isLoading } = useUser();
+  const { user, isLoading, accountType } = useUser();
   const pathname = usePathname();
-  console.log(user);
+  const doctorToShow = [
+    'Home',
+    'Calendar',
+    'Appointments',
+    'Tasks',
+    'Documents',
+    'Settings',
+  ];
+  console.log(typeof accountType);
   return (
     <>
       {user?.hideDock ? (
@@ -26,14 +34,24 @@ const Dock = () => {
               {dockLinks.map((link) => {
                 const Icon = link.icon;
                 return (
-                  <Link href={link.path} key={link.id}>
+                  <Link
+                    href={link.path}
+                    key={link.id}
+                    className={`${
+                      accountType?.toLowerCase() === 'doctor'
+                        ? doctorToShow.includes(link.name)
+                          ? 'flex'
+                          : 'hidden'
+                        : 'flex'
+                    }`}
+                  >
                     <TooltipProvider>
                       <Tooltip delayDuration={0}>
                         <TooltipTrigger>
                           <Icon
                             className={`${
                               pathname === link.path ? 'scale-[1.25]' : ''
-                            } h-14 w-14 hover:scale-[1.25] duration-100 ease-linear`}
+                            }  h-14 w-14 hover:scale-[1.25] duration-100 ease-linear`}
                           />
                         </TooltipTrigger>
                         <TooltipContent>{link.name}</TooltipContent>
@@ -52,8 +70,22 @@ const Dock = () => {
           <div className='w-full bg-black/10 dark:bg-gray-200/10 rounded-full py-1 flex items-center justify-center md:gap-5 lg:gap-12 sm:gap-4'>
             {dockLinks.map((link) => {
               const Icon = link.icon;
+              const newLink =
+                accountType?.toLowerCase() === 'doctor'
+                  ? `${link.path}?doctorId=${user?.id}`
+                  : link.path;
               return (
-                <Link href={link.path} key={link.id}>
+                <Link
+                  href={newLink}
+                  key={link.id}
+                  className={`${
+                    accountType?.toLowerCase() === 'doctor'
+                      ? doctorToShow.includes(link.name)
+                        ? 'flex'
+                        : 'hidden'
+                      : 'flex'
+                  }`}
+                >
                   <TooltipProvider>
                     <Tooltip delayDuration={0}>
                       <TooltipTrigger>

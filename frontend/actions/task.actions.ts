@@ -66,3 +66,18 @@ export const editTask = async ({
 
   return res.data;
 };
+
+export const deleteTask = async ({ taskId }: { taskId: string }) => {
+  const res = await axios.delete(
+    `http://localhost:8080/api/task/delete/${taskId}`
+  );
+  return res.data;
+};
+
+export const markTaskAsDone = async ({ taskId }: { taskId: string }) => {
+  const res = await axios.post('http://localhost:8080/api/task/mark-as-done', {
+    taskId,
+  });
+
+  return res.data;
+};

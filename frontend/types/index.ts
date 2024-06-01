@@ -79,6 +79,9 @@ interface Appointment {
   appointmentType: string;
   appointmentReason: string;
   appointmentReport: string;
+  price: number;
+  hour: string;
+  isNFZ: boolean;
 }
 
 interface Patient {

@@ -5,17 +5,32 @@ import { connect } from 'http2';
 export const getClinicAppointments: RequestHandler = async (req, res, next) => {
   try {
     const { clinicId } = req.params;
-
-    const appointments = await db.appointment.findMany({
-      where: {
-        clinicId,
-      },
-      include: {
-        clinic: true,
-        employee: true,
-        patient: true,
-      },
-    });
+    const { doctorId } = req.query;
+    let appointments;
+    if (doctorId) {
+      appointments = await db.appointment.findMany({
+        where: {
+          clinicId,
+          employeeId: doctorId as string,
+        },
+        include: {
+          clinic: true,
+          employee: true,
+          patient: true,
+        },
+      });
+    } else {
+      appointments = await db.appointment.findMany({
+        where: {
+          clinicId,
+        },
+        include: {
+          clinic: true,
+          employee: true,
+          patient: true,
+        },
+      });
+    }
 
     return res.status(200).json({ appointments });
   } catch (error) {
@@ -34,6 +49,9 @@ export const createAppointment: RequestHandler = async (req, res, next) => {
       note,
       appointmentType,
       appointmentReason,
+      isNFZ,
+      price,
+      hour,
     } = req.body;
 
     const createdAppointment = await db.appointment.create({
@@ -57,6 +75,9 @@ export const createAppointment: RequestHandler = async (req, res, next) => {
         note,
         appointmentType,
         appointmentReason,
+        hour,
+        isNFZ,
+        price,
       },
     });
 

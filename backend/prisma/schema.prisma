@@ -77,10 +77,16 @@ model Specialization {
 model Appointment { 
   id          String   @id @default(cuid())
   date        DateTime
+  hour       String
   note        String?
   appointmentType String
   appointmentReason String
   appointmentReport String?
+  start      DateTime?
+  isNFZ      Boolean @default(false)
+  price      Float?
+  end         DateTime?
+  status      String @default("PENDING")
   employee    Employee @relation(fields: [employeeId], references: [id])
   employeeId  String
   patient     Patient  @relation(fields: [patientId], references: [id])

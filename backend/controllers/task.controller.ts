@@ -41,6 +41,9 @@ export const getTasks: RequestHandler = async (req, res, next) => {
       where: {
         clinicId,
       },
+      include: {
+        assignedTo: true,
+      },
     });
 
     return res.status(200).json({ tasks });
@@ -78,6 +81,44 @@ export const editTask: RequestHandler = async (req, res, next) => {
         deadLine: deadline,
         description,
         priority,
+      },
+    });
+
+    return res.status(200).json({ updatedTask });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const deleteTask: RequestHandler = async (req, res, next) => {
+  try {
+    const { taskId } = req.params;
+
+    const deletedTask = await db.task.delete({
+      where: {
+        id: taskId,
+      },
+    });
+
+    return res.status(200).json({ deletedTask });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const markTaskAsDone: RequestHandler = async (req, res, next) => {
+  try {
+    const { taskId } = req.body;
+
+    const updatedTask = await db.task.update({
+      where: {
+        id: taskId,
+      },
+      data: {
+        done: true,
+        updatedAt: new Date(),
       },
     });
 

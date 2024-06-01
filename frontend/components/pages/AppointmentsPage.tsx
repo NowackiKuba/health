@@ -4,7 +4,9 @@ import { Button } from '../ui/button';
 import {
   CalendarPlus,
   ChevronDown,
+  CircleCheck,
   CirclePlus,
+  CircleX,
   Edit,
   Eye,
   Loader2,
@@ -50,11 +52,16 @@ const AppointmentsPage = () => {
     queryKey: ['getClinic'],
     queryFn: async () => await getCurrentClinic(),
   });
-  const { data: appointments, isLoading } = useQuery({
-    queryKey: ['getAppointments'],
-    queryFn: async () => await getClinicAppointments(),
-  });
   const searchParams = useSearchParams();
+  const { data: appointments, isLoading } = useQuery({
+    queryKey: ['getAppointments', { doctorId: searchParams?.get('doctorId') }],
+    queryFn: async () =>
+      await getClinicAppointments({
+        doctorId: searchParams?.get('doctorId')
+          ? searchParams?.get('doctorId')!
+          : '',
+      }),
+  });
   const router = useRouter();
   const [view, setView] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [activeDoctor, setActiveDoctor] = useState<string>('');
@@ -134,7 +141,7 @@ const AppointmentsPage = () => {
             route='/dashboard/appointments'
             otherClasses='xl:max-w-[400px] w-full'
           />
-          <Select>
+          <Select defaultValue={searchParams?.get('doctorId')!}>
             <SelectTrigger className='max-w-[220px]'>
               <SelectValue placeholder='Select Doctor' />
             </SelectTrigger>
@@ -184,8 +191,9 @@ const AppointmentsPage = () => {
               <TableHead>Type</TableHead>
               <TableHead>Reason</TableHead>
               <TableHead>Date</TableHead>
-              <TableHead>Note</TableHead>
+              <TableHead>NFZ</TableHead>
               <TableHead>Patient</TableHead>
+              <TableHead>Price</TableHead>
               <TableHead className='text-end'>Options</TableHead>
             </TableRow>
           </TableHeader>
@@ -195,14 +203,21 @@ const AppointmentsPage = () => {
                 <TableCell>{appointment.appointmentType.toString()}</TableCell>
                 <TableCell>{appointment.appointmentReason}</TableCell>
                 <TableCell>
-                  {format(appointment.date, 'dd.MM.yyyy, HH:mm')}
+                  {format(appointment.date, 'dd.MM.yyyy')}, {appointment?.hour}
                 </TableCell>
                 <TableCell className='max-w-[200px] truncate'>
-                  {appointment.note || 'No data'}
+                  {appointment?.isNFZ ? (
+                    <CircleCheck className='h-5 w-5 text-green-500' />
+                  ) : (
+                    <CircleX className='h-5 w-5 text-red-500' />
+                  )}
                 </TableCell>
                 <TableCell>
                   {appointment?.patient?.firstName}{' '}
                   {appointment?.patient?.lastName}
+                </TableCell>
+                <TableCell>
+                  {appointment?.isNFZ ? 'N/A' : appointment?.price}
                 </TableCell>
                 <TableCell className='flex justify-end'>
                   <DropdownMenu>
@@ -255,7 +270,15 @@ const AppointmentsPage = () => {
           </TableBody>
         </Table>
       </div>
-      <CreateAppointmentDialog open={isOpenCreate} setOpen={setIsOpenCreate} />
+      <CreateAppointmentDialog
+        open={isOpenCreate}
+        setOpen={setIsOpenCreate}
+        doctorId={
+          searchParams?.get('doctorId')
+            ? searchParams?.get('doctorId')!
+            : undefined
+        }
+      />
       <EditAppointmentDialog
         appointment={selectedAppointment!}
         open={isOpenEdit}

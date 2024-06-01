@@ -3,10 +3,14 @@
 import axios from 'axios';
 import { getCurrentUser } from './user.actions';
 
-export const getClinicAppointments = async (): Promise<TAppointment[]> => {
+export const getClinicAppointments = async ({
+  doctorId,
+}: {
+  doctorId?: string;
+}): Promise<TAppointment[]> => {
   const user = await getCurrentUser();
   const res = await axios.get(
-    `http://localhost:8080/api/appointment/get-clinic-appointments/${user?.user?.clinicId}`
+    `http://localhost:8080/api/appointment/get-clinic-appointments/${user?.user?.clinicId}?doctorId=${doctorId}`
   );
 
   return res.data.appointments;
@@ -20,6 +24,9 @@ export const createAppointment = async ({
   appointmentType,
   appointmentReason,
   clinicId,
+  hour,
+  isNFZ,
+  price,
 }: {
   employeeId: string;
   patientId: string;
@@ -28,6 +35,9 @@ export const createAppointment = async ({
   appointmentType: string;
   appointmentReason: string;
   clinicId: string;
+  hour: string;
+  isNFZ: boolean;
+  price: number;
 }) => {
   const res = await axios.post('http://localhost:8080/api/appointment/create', {
     clinicId,
@@ -37,6 +47,9 @@ export const createAppointment = async ({
     note,
     appointmentType,
     appointmentReason,
+    hour,
+    isNFZ,
+    price,
   });
 
   return res.data;

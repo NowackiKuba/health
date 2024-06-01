@@ -1,10 +1,18 @@
 import express from 'express';
-import { createTask, editTask, getTasks } from '../controllers/task.controller';
+import {
+  createTask,
+  deleteTask,
+  editTask,
+  getTasks,
+  markTaskAsDone,
+} from '../controllers/task.controller';
 
 const router = express.Router();
 
-router.post('/create', createTask);
 router.get('/get-tasks/:clinicId', getTasks);
+router.post('/create', createTask);
 router.post('/edit', editTask);
+router.post('/mark-as-done/', markTaskAsDone);
+router.delete('/delete/:taskId', deleteTask);
 
 export default router;

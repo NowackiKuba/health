@@ -2,6 +2,7 @@ import React, {
   Dispatch,
   DispatchWithoutAction,
   SetStateAction,
+  useEffect,
   useState,
 } from 'react';
 import { Dialog, DialogContent } from '../ui/dialog';
@@ -27,6 +28,9 @@ import { toast } from '../ui/use-toast';
 import ButtonLoading from '../ButtonLoading';
 import { getCurrentClinic } from '@/actions/clinic.actions';
 import CreatePatientDialog from './CreatePatientDialog';
+import axios from 'axios';
+import SelectAppointmentDateDialog from './SelectAppointmentDateDialog';
+import { Checkbox } from '../ui/checkbox';
 
 interface Props {
   open: boolean;
@@ -46,11 +50,14 @@ const CreateAppointmentDialog = ({
   const [selectedDoctorId, setSelectedDoctorId] = useState<string>(
     doctorId ? doctorId : ''
   );
+  const [selectedDoctor, setSelectedDoctor] = useState<TEmployee>();
   const [date, setDate] = useState<Date>();
   const [hour, setHour] = useState<string>('');
   const [note, setNote] = useState<string>('');
   const [appointmentType, setAppointmentType] = useState<string>('');
   const [appointmentReason, setAppointmentReason] = useState<string>('');
+  const [isNFZ, setIsNFZ] = useState<boolean>(false);
+  const [price, setPrice] = useState<number>(0);
   const [selectedPatient, setSelectedPatient] = useState<string>(
     patientId ? patientId : ''
   );
@@ -59,7 +66,7 @@ const CreateAppointmentDialog = ({
     queryKey: ['getCurrentClinic'],
     queryFn: async () => await getCurrentClinic(),
   });
-
+  const [isOpenDate, setIsOpenDate] = useState<boolean>(false);
   const queryClient = useQueryClient();
   const { mutate: handleCreateAppointment, isPending: isCreating } =
     useMutation({
@@ -85,6 +92,18 @@ const CreateAppointmentDialog = ({
         });
       },
     });
+
+  useEffect(() => {
+    if (!selectedDoctorId) return;
+    const fetchDoctor = async () => {
+      const res = await axios.get(
+        `http://localhost:8080/api/employee/${selectedDoctorId}`
+      );
+      setSelectedDoctor(res.data.employee);
+    };
+    fetchDoctor();
+  }, [selectedDoctorId]);
+
   return (
     <Dialog
       open={open}
@@ -112,36 +131,18 @@ const CreateAppointmentDialog = ({
           <Label>Appointment Reason</Label>
           <Input onChange={(e) => setAppointmentReason(e.target.value)} />
         </div>
-        <div className='flex items-center gap-2 w-full'>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={'outline'}
-                className={cn(
-                  'w-full justify-start text-left font-normal',
-                  !date && 'text-muted-foreground'
-                )}
-              >
-                <CalendarIcon className='mr-2 h-4 w-4' />
-                {date ? format(date, 'PPP') : <span>Pick a date</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className='w-auto p-0'>
-              <Calendar
-                mode='single'
-                selected={date}
-                onSelect={setDate}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-          <Input type='time' onChange={(e) => setHour(e.target.value)} />
-        </div>
         <div className='flex flex-col gap-0.5 w-full'>
           <Label>Doctors</Label>
           <Select
+            disabled={doctorId ? true : false}
             defaultValue={doctorId}
-            onValueChange={(e) => setSelectedDoctorId(e)}
+            onValueChange={async (e) => {
+              setSelectedDoctorId(e);
+              const res = await axios.get(
+                `http://localhost:8080/api/employee/${e}`
+              );
+              setSelectedDoctor(res.data.employee);
+            }}
           >
             <SelectTrigger>
               <SelectValue placeholder='Select Doctor' />
@@ -163,10 +164,31 @@ const CreateAppointmentDialog = ({
             </SelectContent>
           </Select>
         </div>
+        {selectedDoctor && (
+          <div
+            onClick={() => setIsOpenDate(true)}
+            className='border w-full rounded-md flex items-center gap-2 py-2 text-sm px-4 text-gray-500 cursor-pointer'
+          >
+            {hour && date ? (
+              <>
+                <CalendarIcon className='h-4 w-4' />
+                <p>
+                  {format(date, 'dd.MM')}, {hour}
+                </p>
+              </>
+            ) : (
+              <>
+                <CalendarIcon className='h-4 w-4' />
+                <p>Select Date</p>
+              </>
+            )}
+          </div>
+        )}
         <div className='flex flex-col gap-0.5 w-full'>
           <Label>Patients</Label>
           <Select
-            defaultValue={doctorId}
+            disabled={patientId ? true : false}
+            defaultValue={patientId}
             onValueChange={(e) => setSelectedPatient(e)}
           >
             <SelectTrigger>
@@ -191,6 +213,28 @@ const CreateAppointmentDialog = ({
           </p>
         </div>
         <div className='flex flex-col gap-0.5 w-full'>
+          <Label>Price</Label>
+          <Input
+            onChange={(e) => setPrice(+e.target.value)}
+            defaultValue={price}
+            value={price}
+          />
+          <div className='flex items-center gap-2 text-sm'>
+            <Checkbox
+              checked={isNFZ}
+              onCheckedChange={() => {
+                setIsNFZ((prev) => !prev);
+                if (!isNFZ) {
+                  setPrice(0);
+                } else {
+                  setPrice((prev) => prev);
+                }
+              }}
+            />
+            <p>NFZ Appointment</p>
+          </div>
+        </div>
+        <div className='flex flex-col gap-0.5 w-full'>
           <Label>Note (optional)</Label>
           <Textarea
             onChange={(e) => setNote(e.target.value)}
@@ -208,18 +252,17 @@ const CreateAppointmentDialog = ({
           </Button>
           <Button
             onClick={() => {
-              const today = new Date(
-                new Date().setHours(+hour.split(':')[0], +hour.split(':')[1])
-              );
-
               handleCreateAppointment({
                 appointmentReason,
                 appointmentType,
-                date: today,
+                date: date!,
                 employeeId: selectedDoctorId,
                 note,
                 patientId: selectedPatient,
                 clinicId: clinic?.id!,
+                hour,
+                isNFZ,
+                price,
               });
             }}
             className='w-full'
@@ -235,6 +278,15 @@ const CreateAppointmentDialog = ({
       <CreatePatientDialog
         open={isOpenCreatePatient}
         setOpen={setIsOpenCreatePatient}
+      />
+      <SelectAppointmentDateDialog
+        employeeId={selectedDoctorId}
+        open={isOpenDate}
+        setOpen={setIsOpenDate}
+        setSelectedHour={setHour}
+        selectedHour={hour}
+        setSelectedDate={setDate}
+        selectedDate={date!}
       />
     </Dialog>
   );

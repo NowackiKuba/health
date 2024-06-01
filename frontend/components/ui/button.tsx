@@ -20,6 +20,10 @@ const buttonVariants = cva(
         link: 'text-primary underline-offset-4 hover:underline',
         'primary-outline':
           'bg-primary/10 text-primary dark:bg-green-500/20 dark:text-green-200',
+        'success-ghost':
+          'hover:bg-green-500/20 hover:text-primary dark:hover:text-green-200 text-primary dark:hover:text-green-200 ',
+        'destructive-ghost':
+          'hover:bg-red-500/20 hover:text-red-500 dark:hover:text-red-200 text-red-500 dark:hover:text-red-200 ',
       },
       size: {
         default: 'h-10 px-4 py-2',
