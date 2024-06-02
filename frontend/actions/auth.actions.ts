@@ -71,3 +71,10 @@ export const logInUser = async ({
 
   return res.data.user.id;
 };
+
+export const decryptPesel = async (pesel: string): Promise<string> => {
+  const res = await axios.post(`http://localhost:8080/api/auth/decode-pesel`, {
+    pesel,
+  });
+  return res.data.pesel;
+};

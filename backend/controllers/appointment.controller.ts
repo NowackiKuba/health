@@ -16,7 +16,11 @@ export const getClinicAppointments: RequestHandler = async (req, res, next) => {
         include: {
           clinic: true,
           employee: true,
-          patient: true,
+          patient: {
+            include: {
+              appointments: true,
+            },
+          },
         },
       });
     } else {

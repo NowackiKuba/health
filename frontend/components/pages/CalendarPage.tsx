@@ -98,7 +98,7 @@ const CalendarPage = () => {
           {hours?.map((hour, index) => (
             <div
               key={`${hour}-${index}`}
-              className='flex items-end h-[60px] w-full border-b'
+              className='flex items-end h-[120px] w-full border-b'
             >
               {hour}
             </div>

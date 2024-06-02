@@ -2,6 +2,7 @@ import { RequestHandler } from 'express';
 import { db } from '../db/prisma';
 import bcrypt from 'bcrypt';
 import { Role } from '@prisma/client';
+import CryptoJS from 'crypto-js';
 
 export const createClinicAccount: RequestHandler = async (req, res, next) => {
   try {
@@ -69,6 +70,23 @@ export const logInUser: RequestHandler = async (req, res, next) => {
     }
 
     return res.status(200).json({ user });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const decodePesel: RequestHandler = async (req, res, next) => {
+  try {
+    const { pesel } = req.body;
+    const decryptedPesel = CryptoJS.AES.decrypt(
+      pesel,
+      process.env.ENCRYPTION_KEY!
+    );
+
+    return res
+      .status(200)
+      .json({ pesel: decryptedPesel.toString(CryptoJS.enc.Utf8) });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: 'Internal server error' });

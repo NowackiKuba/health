@@ -108,6 +108,7 @@ model Patient {
   state       String?
   zip         String?
   pesel       String 
+  dateOfBirth DateTime?
   chronicDiseases String[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -121,6 +122,7 @@ model Prescription {
   id          String   @id @default(cuid())
   date        DateTime
   note        String
+  pdfLinkUrl  String
   patient     Patient  @relation(fields: [patientId], references: [id])
   patientId   String
   employee   Employee @relation(fields: [employeeId], references: [id])

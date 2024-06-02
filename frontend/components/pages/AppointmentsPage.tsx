@@ -2,7 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import {
+  CalendarClock,
   CalendarPlus,
+  CalendarRange,
   ChevronDown,
   CircleCheck,
   CirclePlus,
@@ -46,6 +48,15 @@ import {
 import { format } from 'date-fns';
 import EditAppointmentDialog from '../dialogs/EditAppointmentDialog';
 import AppointmentDetailsDialog from '../dialogs/AppointmentDetailsDialog';
+import { TbCalendarStats } from 'react-icons/tb';
+import { MdWork } from 'react-icons/md';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../ui/tooltip';
+import WorkAppointmentDialog from '../dialogs/WorkAppointmentDialog';
 
 const AppointmentsPage = () => {
   const { data: clinic, isLoading: isLoadingClinic } = useQuery({
@@ -63,7 +74,7 @@ const AppointmentsPage = () => {
       }),
   });
   const router = useRouter();
-  const [view, setView] = useState<'daily' | 'weekly' | 'monthly'>('daily');
+  const [view, setView] = useState<'history' | 'upcoming'>('upcoming');
   const [activeDoctor, setActiveDoctor] = useState<string>('');
   const [activePatient, setActivePatient] = useState<string>('');
   const [selectedAppointment, setSelectedAppointment] =
@@ -71,6 +82,7 @@ const AppointmentsPage = () => {
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
   const [isOpenEdit, setIsOpenEdit] = useState<boolean>(false);
   const [isOpenCreate, setIsOpenCreate] = useState<boolean>(false);
+  const [isOpenWorkView, setIsOpenWorkView] = useState<boolean>(false);
   const handleSelect = (item: string, type: 'doctor' | 'patient') => {
     if (type === 'doctor') {
       if (activeDoctor === item) {
@@ -183,6 +195,36 @@ const AppointmentsPage = () => {
             ]}
           />
         </div>
+        <div className='flex items-center gap-2 '>
+          <TooltipProvider>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Button
+                  size={'icon'}
+                  variant={view === 'upcoming' ? 'default' : 'primary-outline'}
+                  onClick={() => setView('upcoming')}
+                >
+                  <CalendarClock className='h-5 w-5' />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Upcoming Appointments</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Button
+                  size={'icon'}
+                  variant={view === 'history' ? 'default' : 'primary-outline'}
+                  onClick={() => setView('history')}
+                >
+                  <CalendarRange className='h-5 w-5' />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Appointments History</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </div>
       <div className='w-full'>
         <Table>
@@ -199,7 +241,20 @@ const AppointmentsPage = () => {
           </TableHeader>
           <TableBody>
             {appointments?.map((appointment) => (
-              <TableRow key={appointment.id}>
+              <TableRow
+                key={appointment.id}
+                className={`w-full ${
+                  view === 'history'
+                    ? format(appointment?.date, 'dd.MM.yyyy') <=
+                      format(new Date(), 'dd.MM.yyyy')
+                      ? ''
+                      : 'hidden'
+                    : format(appointment?.date, 'dd.MM.yyyy') >=
+                      format(new Date(), 'dd.MM.yyyy')
+                    ? ''
+                    : 'hidden'
+                } `}
+              >
                 <TableCell>{appointment.appointmentType.toString()}</TableCell>
                 <TableCell>{appointment.appointmentReason}</TableCell>
                 <TableCell>
@@ -228,6 +283,7 @@ const AppointmentsPage = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       <DropdownMenuItem
+                        disabled={view === 'history'}
                         onClick={() => {
                           setSelectedAppointment(appointment);
                           setIsOpenEdit(true);
@@ -246,6 +302,31 @@ const AppointmentsPage = () => {
                       >
                         <Eye className='h-4 w-4' />
                         <p>See Details</p>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        disabled={
+                          format(appointment.date, 'dd.MM.yyyy') >
+                            format(new Date(), 'dd.MM.yyyy') ||
+                          view === 'history'
+                        }
+                        onClick={() => {
+                          setSelectedAppointment(appointment);
+                          setIsOpenWorkView(true);
+                        }}
+                        className='flex cursor-pointer hover:text-current items-center gap-2 text-sm'
+                      >
+                        <TooltipProvider>
+                          <Tooltip delayDuration={0}>
+                            <TooltipTrigger className='flex items-center gap-2'>
+                              <MdWork className='h-4 w-4' />
+                              <p>Work View</p>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              Open work view to start or end appointment, give
+                              prescription and more
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
@@ -287,6 +368,11 @@ const AppointmentsPage = () => {
       <AppointmentDetailsDialog
         open={isOpenDetails}
         setOpen={setIsOpenDetails}
+        appointment={selectedAppointment!}
+      />
+      <WorkAppointmentDialog
+        open={isOpenWorkView}
+        setOpen={setIsOpenWorkView}
         appointment={selectedAppointment!}
       />
     </div>
