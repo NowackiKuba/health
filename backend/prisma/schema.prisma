@@ -38,6 +38,9 @@ model Clinic {
   appointments Appointment[]
   safeDataCode String? @default(cuid())
   tasks Task[]
+  documents Document[]
+  services Service[]
+  websiteUrl String?
 }
 
 model Employee { 
@@ -61,6 +64,9 @@ model Employee {
   prescriptions Prescription[]
   hideDock Boolean @default(false)
   tasks Task[]
+  createdPatients Patient[]
+  createdAppointments Appointment[] @relation("CreatedByRelation")
+  services Service[]
 }
 
 
@@ -95,6 +101,10 @@ model Appointment {
   updatedAt   DateTime @updatedAt
   clinic     Clinic   @relation(fields: [clinicId], references: [id])
   clinicId   String
+  createdBy Employee @relation("CreatedByRelation", fields: [createdById], references: [id])
+  createdById String 
+  service     Service? @relation(fields: [serviceId], references: [id])
+  serviceId   String?
 }
 
 model Patient { 
@@ -115,6 +125,9 @@ model Patient {
   appointments Appointment[]
   prescriptions Prescription[]
   clinics Clinic[]
+  documents Document[]
+  createdBy Employee @relation(fields: [createdById], references: [id])
+  createdById String
 
 }
 
@@ -154,3 +167,31 @@ model Task {
   clinic     Clinic   @relation(fields: [clinicId], references: [id])
   clinicId   String
 }
+
+model Document { 
+  id          String   @id @default(cuid())
+  title       String
+  linkUrl     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  clinic     Clinic   @relation(fields: [clinicId], references: [id])
+  clinicId   String
+  patient     Patient?  @relation(fields: [patientId], references: [id])
+  patientId   String?
+  fileSize    Int
+}
+
+model Service { 
+  id          String   @id @default(cuid())
+  name        String
+  price       Float
+  duration    Int
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  clinic     Clinic   @relation(fields: [clinicId], references: [id])
+  clinicId   String
+  employees   Employee[]
+  appointments Appointment[]
+}
+

@@ -56,6 +56,8 @@ export const createAppointment: RequestHandler = async (req, res, next) => {
       isNFZ,
       price,
       hour,
+      createdById,
+      serviceId,
     } = req.body;
 
     const createdAppointment = await db.appointment.create({
@@ -82,6 +84,12 @@ export const createAppointment: RequestHandler = async (req, res, next) => {
         hour,
         isNFZ,
         price,
+        service: serviceId ? { connect: { id: serviceId } } : undefined,
+        createdBy: {
+          connect: {
+            id: createdById,
+          },
+        },
       },
     });
 

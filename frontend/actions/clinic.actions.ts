@@ -45,6 +45,7 @@ export const createPatientAccount = async ({
       zip: data.zip,
       state: data.state,
       clinicId: user?.user?.clinicId,
+      createdById: user?.user?.id,
     }
   );
 
@@ -70,4 +71,40 @@ export const getCurrentClinic = async (): Promise<TClinic> => {
   );
 
   return res.data.clinic;
+};
+
+export const editClinic = async ({
+  clinicId,
+  name,
+  phone,
+  address,
+  city,
+  zip,
+  state,
+  email,
+  website,
+}: {
+  clinicId: string;
+  name: string;
+  phone: string;
+  address: string;
+  city: string;
+  zip: string;
+  state: string;
+  email: string;
+  website?: string;
+}) => {
+  const res = await axios.post('http://localhost:8080/api/clinic/edit', {
+    clinicId,
+    name,
+    phone,
+    address,
+    city,
+    zip,
+    state,
+    email,
+    website,
+  });
+
+  return res.data;
 };

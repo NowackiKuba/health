@@ -31,6 +31,7 @@ import CreatePatientDialog from './CreatePatientDialog';
 import axios from 'axios';
 import SelectAppointmentDateDialog from './SelectAppointmentDateDialog';
 import { Checkbox } from '../ui/checkbox';
+import useClinic from '@/hooks/useClinic';
 
 interface Props {
   open: boolean;
@@ -55,6 +56,9 @@ const CreateAppointmentDialog = ({
   const [hour, setHour] = useState<string>('');
   const [note, setNote] = useState<string>('');
   const [appointmentType, setAppointmentType] = useState<string>('');
+  const [selectedSerivce, setSelectedService] = useState<TService | undefined>(
+    undefined
+  );
   const [appointmentReason, setAppointmentReason] = useState<string>('');
   const [isNFZ, setIsNFZ] = useState<boolean>(false);
   const [price, setPrice] = useState<number>(0);
@@ -62,10 +66,7 @@ const CreateAppointmentDialog = ({
     patientId ? patientId : ''
   );
 
-  const { data: clinic } = useQuery({
-    queryKey: ['getCurrentClinic'],
-    queryFn: async () => await getCurrentClinic(),
-  });
+  const { clinic, isLoading } = useClinic();
   const [isOpenDate, setIsOpenDate] = useState<boolean>(false);
   const queryClient = useQueryClient();
   const { mutate: handleCreateAppointment, isPending: isCreating } =
@@ -263,6 +264,7 @@ const CreateAppointmentDialog = ({
                 hour,
                 isNFZ,
                 price,
+                serviceId: selectedSerivce?.id,
               });
             }}
             className='w-full'
@@ -287,6 +289,9 @@ const CreateAppointmentDialog = ({
         selectedHour={hour}
         setSelectedDate={setDate}
         selectedDate={date!}
+        services={clinic?.services!}
+        setSelectedService={setSelectedService}
+        selectedService={selectedSerivce}
       />
     </Dialog>
   );

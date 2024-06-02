@@ -9,6 +9,8 @@ import patientRoutes from './routes/patient.route.ts';
 import employeeRoutes from './routes/employee.route.ts';
 import appointmentRoutes from './routes/appointment.route.ts';
 import taskRoutes from './routes/task.route.ts';
+import documentRoutes from './routes/document.route.ts';
+import serviceRoutes from './routes/service.route.ts';
 dotenv.config();
 
 const app = express();
@@ -28,7 +30,9 @@ app.use('/api/user', userRoutes);
 app.use('/api/clinic', clinicRoutes);
 app.use('/api/patient', patientRoutes);
 app.use('/api/employee', employeeRoutes);
+app.use('/api/document', documentRoutes);
 app.use('/api/appointment', appointmentRoutes);
+app.use('/api/service', serviceRoutes);
 app.use('/api/task', taskRoutes);
 
 app.listen(port, () => {

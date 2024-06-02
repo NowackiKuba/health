@@ -67,7 +67,7 @@ const Dock = () => {
         </div>
       ) : (
         <div className='absolute z-10 sm:flex hidden w-full xl:px-16 lg:px-20 md:px-8 pb-3 sm:px-2'>
-          <div className='w-full bg-black/10 dark:bg-gray-200/10 rounded-full py-1 flex items-center justify-center md:gap-5 lg:gap-12 sm:gap-4'>
+          <div className='w-full bg-black/10 dark:bg-gray-200/10 rounded-full py-1 flex items-center justify-center md:gap-5 lg:gap-8 xl:gap-12 gap-6'>
             {dockLinks.map((link) => {
               const Icon = link.icon;
               const newLink =
@@ -92,7 +92,7 @@ const Dock = () => {
                         <Icon
                           className={`${
                             pathname === link.path ? 'scale-[1.25]' : ''
-                          } sm:h-[44px] sm:w-[44px] md:h-10 lg:h-14 md:w-10 lg:w-14 hover:scale-[1.25] duration-100 ease-linear`}
+                          } h-10 w-10 md:h-10 lg:h-14 md:w-10 lg:w-14 hover:scale-[1.25] duration-100 ease-linear`}
                         />
                       </TooltipTrigger>
                       <TooltipContent>{link.name}</TooltipContent>
@@ -101,8 +101,6 @@ const Dock = () => {
                 </Link>
               );
             })}
-            <div className='h-12 w-[1px] dark:bg-gray-100 bg-gray-600'></div>
-            <LogOut className='h-10 w-10' />
           </div>
         </div>
       )}

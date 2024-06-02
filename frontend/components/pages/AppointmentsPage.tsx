@@ -17,8 +17,11 @@ import {
 } from 'lucide-react';
 import Searchbar from '../Searchbar';
 import QuerySelector from '../QuerySelector';
-import { useQuery } from '@tanstack/react-query';
-import { getClinicAppointments } from '@/actions/appointment.action';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import {
+  deleteAppointment,
+  getClinicAppointments,
+} from '@/actions/appointment.action';
 import {
   Select,
   SelectContent,
@@ -49,7 +52,7 @@ import { format } from 'date-fns';
 import EditAppointmentDialog from '../dialogs/EditAppointmentDialog';
 import AppointmentDetailsDialog from '../dialogs/AppointmentDetailsDialog';
 import { TbCalendarStats } from 'react-icons/tb';
-import { MdWork } from 'react-icons/md';
+import { MdHealing, MdWork } from 'react-icons/md';
 import {
   Tooltip,
   TooltipContent,
@@ -57,6 +60,7 @@ import {
   TooltipTrigger,
 } from '../ui/tooltip';
 import WorkAppointmentDialog from '../dialogs/WorkAppointmentDialog';
+import { toast } from '../ui/use-toast';
 
 const AppointmentsPage = () => {
   const { data: clinic, isLoading: isLoadingClinic } = useQuery({
@@ -120,7 +124,25 @@ const AppointmentsPage = () => {
     }
   };
   console.log(appointments);
-
+  const { mutate: deleteAppointmentMutation, isPending: isDeleting } =
+    useMutation({
+      mutationKey: ['deleteAppointment'],
+      mutationFn: deleteAppointment,
+      onSuccess: () => {
+        toast({
+          title: 'Successfully deleted appointment',
+          duration: 1500,
+        });
+      },
+      onError: () => {
+        toast({
+          title: 'Failed to delete appointment',
+          duration: 1500,
+          description: 'Please try again later',
+          variant: 'destructive',
+        });
+      },
+    });
   if (isLoading || isLoadingClinic) {
     return <p>loading</p>;
   }
@@ -145,16 +167,16 @@ const AppointmentsPage = () => {
           </Button>
         </div>
       </div>
-      <div className='flex items-center justify-between w-full'>
-        <div className='flex items-center gap-2 w-full'>
+      <div className='flex items-center lg:flex-row flex-col justify-start lg:justify-between w-full'>
+        <div className='flex lg:flex-row flex-col items-center gap-2 w-full'>
           <Searchbar
             placeholder='Search for appointments'
             iconPosition='left'
             route='/dashboard/appointments'
-            otherClasses='xl:max-w-[400px] w-full'
+            otherClasses='xl:max-w-[400px] lg:w-full w-full'
           />
           <Select defaultValue={searchParams?.get('doctorId')!}>
-            <SelectTrigger className='max-w-[220px]'>
+            <SelectTrigger className='w-full lg:max-w-[220px]'>
               <SelectValue placeholder='Select Doctor' />
             </SelectTrigger>
             <SelectContent>
@@ -174,7 +196,7 @@ const AppointmentsPage = () => {
             </SelectContent>
           </Select>
           <Select>
-            <SelectTrigger className='max-w-[220px]'>
+            <SelectTrigger className='w-full lg:max-w-[220px]'>
               <SelectValue placeholder='Select Patient' />
             </SelectTrigger>
             <SelectContent>
@@ -188,14 +210,14 @@ const AppointmentsPage = () => {
           <QuerySelector
             placeholder='Sort'
             queryKey='sort'
-            otherClasses='xl:max-w-[220px]'
+            otherClasses='w-full lg:max-w-[220px]'
             options={[
               { key: 'newest', value: 'Newest' },
               { key: 'oldest', value: 'Oldest' },
             ]}
           />
         </div>
-        <div className='flex items-center gap-2 '>
+        <div className='flex items-center gap-2 lg:justify-end justify-start lg:mt-0 mt-2 w-full'>
           <TooltipProvider>
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
@@ -204,7 +226,7 @@ const AppointmentsPage = () => {
                   variant={view === 'upcoming' ? 'default' : 'primary-outline'}
                   onClick={() => setView('upcoming')}
                 >
-                  <CalendarClock className='h-5 w-5' />
+                  <CalendarClock className='md:h-12 md:w-12 lg:h-5 lg:w-5' />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Upcoming Appointments</TooltipContent>
@@ -218,7 +240,7 @@ const AppointmentsPage = () => {
                   variant={view === 'history' ? 'default' : 'primary-outline'}
                   onClick={() => setView('history')}
                 >
-                  <CalendarRange className='h-5 w-5' />
+                  <CalendarRange className=' sm:h-8 md:h-12 sm:w-8 md:w-12 lg:h-5 lg:w-5' />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Appointments History</TooltipContent>
@@ -226,7 +248,7 @@ const AppointmentsPage = () => {
           </TooltipProvider>
         </div>
       </div>
-      <div className='w-full'>
+      <div className='md:flex hidden w-full'>
         <Table>
           <TableHeader>
             <TableRow>
@@ -331,16 +353,18 @@ const AppointmentsPage = () => {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className='flex cursor-pointer hover:text-current items-center gap-2 text-sm text-red-500'
-                        //   onClick={() =>
-                        //     deletePatientMutation({ patientId: patient.id })
-                        //   }
-                        //   disabled={isDeleting}
+                        onClick={() =>
+                          deleteAppointmentMutation({
+                            appointmentId: appointment.id,
+                          })
+                        }
+                        disabled={isDeleting}
                       >
-                        {/* {isDeleting ? ( */}
-                        {/* <Loader2 className='h-4 w-4 animate-spin' /> */}
-                        {/* ) : ( */}
-                        <Trash className='h-4 w-4' />
-                        {/* )} */}
+                        {isDeleting ? (
+                          <Loader2 className='h-4 w-4 animate-spin' />
+                        ) : (
+                          <Trash className='h-4 w-4' />
+                        )}
                         <p>Delete Appointment</p>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -350,6 +374,84 @@ const AppointmentsPage = () => {
             ))}
           </TableBody>
         </Table>
+      </div>
+      <div className='flex md:hidden flex-col items-start justify-start w-full gap-2'>
+        {appointments?.map((appointment) => (
+          <div
+            key={appointment.id}
+            className='flex items-center justify-between w-full bg-secondary rounded-xl md:p-3 p-2'
+          >
+            <div className='rounded-md md:h-20 md:w-20 h-16 w-16 bg-primary/10 text-primary dark:bg-green-500/20 dark:text-green-200 flex items-center justify-center'>
+              <MdHealing className='md:h-10 md:w-10 h-8 w-8' />
+            </div>
+            <p>{appointment?.appointmentType}</p>
+            <p>
+              {format(appointment?.date, 'dd.MM.yyyy')}, {appointment?.hour}
+            </p>
+            <p>{appointment?.price} PLN</p>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant={'ghost'} size={'icon'}>
+                  <Settings />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  disabled={view === 'history'}
+                  onClick={() => {
+                    setSelectedAppointment(appointment);
+                    setIsOpenEdit(true);
+                  }}
+                  className='flex cursor-pointer hover:text-current items-center gap-2 text-sm'
+                >
+                  <Edit className='h-4 w-4' />
+                  <p>Edit Appointment</p>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setSelectedAppointment(appointment);
+                    setIsOpenDetails(true);
+                  }}
+                  className='flex cursor-pointer hover:text-current items-center gap-2 text-sm'
+                >
+                  <Eye className='h-4 w-4' />
+                  <p>See Details</p>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={
+                    format(appointment.date, 'dd.MM.yyyy') >
+                      format(new Date(), 'dd.MM.yyyy') || view === 'history'
+                  }
+                  onClick={() => {
+                    setSelectedAppointment(appointment);
+                    setIsOpenWorkView(true);
+                  }}
+                  className='flex cursor-pointer hover:text-current items-center gap-2 text-sm'
+                >
+                  <MdWork className='h-4 w-4' />
+                  <p>Work View</p>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className='flex cursor-pointer hover:text-current items-center gap-2 text-sm text-red-500'
+                  onClick={() =>
+                    deleteAppointmentMutation({
+                      appointmentId: appointment.id,
+                    })
+                  }
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <Loader2 className='h-4 w-4 animate-spin' />
+                  ) : (
+                    <Trash className='h-4 w-4' />
+                  )}
+                  <p>Delete Appointment</p>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ))}
       </div>
       <CreateAppointmentDialog
         open={isOpenCreate}

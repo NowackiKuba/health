@@ -13,6 +13,7 @@ import {
 } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '../ui/button';
+import { MdMiscellaneousServices } from 'react-icons/md';
 
 interface Props {
   open: boolean;
@@ -22,6 +23,9 @@ interface Props {
   setSelectedHour: Dispatch<SetStateAction<string>>;
   selectedDate: Date;
   setSelectedDate: Dispatch<SetStateAction<Date | undefined>>;
+  services: TService[];
+  setSelectedService: Dispatch<SetStateAction<TService | undefined>>;
+  selectedService: TService | undefined;
 }
 
 const SelectAppointmentDateDialog = ({
@@ -32,6 +36,9 @@ const SelectAppointmentDateDialog = ({
   selectedDate,
   setSelectedDate,
   setSelectedHour,
+  services,
+  setSelectedService,
+  selectedService,
 }: Props) => {
   const [hourIndex, setHourIndex] = useState<number>(0);
   const [hourEndIndex, setHourEndIndex] = useState<number>(5);
@@ -103,23 +110,28 @@ const SelectAppointmentDateDialog = ({
           <p className='text-xl font-semibold'>
             {format(currentMonth, 'LLLL yyyy')}
           </p>
-          {/* <h2>{format(currentMonth, 'MMMM yyyy')}</h2> */}
-          {/* <button onClick={handlePreviousWeek}>Previous Week</button> */}
-          {/* <button onClick={handleNextWeek}>Next Week</button> */}
-          {/* <div className='week'>{renderDaysOfWeek()}</div> */}
+
           <div className='flex items-center gap-3 w-full'>
             <ChevronLeft onClick={handlePreviousWeek} />
             <div className='flex items-center w-full gap-2'>
               {renderDaysOfWeek().map((d) => (
                 <div
                   className={`${
+                    selectedDate &&
                     format(d, 'dd.MM.yyyy') ==
-                    format(selectedDate || new Date(), 'dd.MM.yyyy')
+                      format(selectedDate, 'dd.MM.yyyy')
                       ? 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary'
                       : ''
-                  } flex flex-col items-center justify-center w-24 h-28  border rounded-md`}
+                  } flex flex-col cursor-pointer items-center justify-center w-24 h-28  border rounded-md`}
                   onClick={() => {
-                    setSelectedDate(d);
+                    if (
+                      format(d, 'dd.MM.yyyy') ==
+                      format(selectedDate || new Date(), 'dd.MM.yyyy')
+                    ) {
+                      setSelectedDate(undefined);
+                    } else {
+                      setSelectedDate(d);
+                    }
                   }}
                   key={d.toString()}
                 >
@@ -169,7 +181,11 @@ const SelectAppointmentDateDialog = ({
                   ) {
                     return;
                   } else {
-                    setSelectedHour(hour);
+                    if (selectedHour === hour) {
+                      setSelectedHour('');
+                    } else {
+                      setSelectedHour(hour);
+                    }
                   }
                 }}
                 className={`cursor-pointer ${
@@ -208,6 +224,36 @@ const SelectAppointmentDateDialog = ({
               }}
             />
           </div>
+        </div>
+        <div className='px-8 pb-4 border-b gap-3 w-full flex flex-col items-start'>
+          <p className='text-xl font-[500]'>Select Service (Optional)</p>
+          {services?.map((service) => (
+            <div
+              className={`${
+                selectedService?.id === service.id ? 'ring-2 ring-primary' : ''
+              } flex items-center cursor-pointer gap-2 xl:w-[280px] rounded-xl bg-secondary p-2`}
+              key={service.id}
+              onClick={() => {
+                if (service.id === selectedService?.id) {
+                  setSelectedService(undefined);
+                } else {
+                  setSelectedService(service);
+                }
+              }}
+            >
+              <div
+                className={`h-14 w-14 rounded-full bg-primary/10 text-primary dark:bg-green-500/20 dark:text-green-200 flex items-center justify-center`}
+              >
+                <MdMiscellaneousServices className='h-7 w-7' />
+              </div>
+              <div className='flex flex-col'>
+                <p className='text-lg font-semibold'>{service?.name}</p>
+                <p className='text-sm'>
+                  {service?.price} PLN &middot; {service?.duration} minutes
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
         <Button className='w-full' onClick={() => setOpen(false)}>
           Continue

@@ -1,4 +1,5 @@
 import {
+  FcAutomatic,
   FcCalendar,
   FcCollaboration,
   FcDocument,
@@ -6,6 +7,7 @@ import {
   FcManager,
   FcOvertime,
   FcParallelTasks,
+  FcServices,
   FcSettings,
   FcSurvey,
 } from 'react-icons/fc';
@@ -34,5 +36,6 @@ export const dockLinks = [
   },
   { id: 7, name: 'Tasks', path: '/dashboard/tasks', icon: FcParallelTasks },
   { id: 8, name: 'Documents', path: '/dashboard/documents', icon: FcDocument },
+  { id: 10, name: 'Services', path: '/dashboard/services', icon: FcServices },
   { id: 9, name: 'Settings', path: '/dashboard/settings', icon: FcSettings },
 ];

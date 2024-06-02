@@ -117,6 +117,7 @@ export const createPatientAccount: RequestHandler = async (req, res, next) => {
       state,
       pesel,
       clinicId,
+      createdById,
     } = req.body;
     const encryptedPesel = CryptoJS.AES.encrypt(
       pesel,
@@ -136,6 +137,11 @@ export const createPatientAccount: RequestHandler = async (req, res, next) => {
         clinics: {
           connect: {
             id: clinicId,
+          },
+        },
+        createdBy: {
+          connect: {
+            id: createdById,
           },
         },
       },
@@ -176,10 +182,49 @@ export const getCurrentClinic: RequestHandler = async (req, res, next) => {
       include: {
         employees: true,
         patients: true,
+        appointments: true,
+        services: true,
       },
     });
 
     return res.status(200).json({ clinic });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const editClinic: RequestHandler = async (req, res, next) => {
+  try {
+    const { clinicId, name, phone, address, city, zip, state, email, website } =
+      req.body;
+
+    const clinic = await db.clinic.findUnique({
+      where: {
+        id: clinicId,
+      },
+    });
+
+    if (!clinic) {
+      return res.status(404).json({ message: 'Clinic not found' });
+    }
+    const updatedClinic = await db.clinic.update({
+      where: {
+        id: clinicId,
+      },
+      data: {
+        name,
+        phone,
+        address,
+        city,
+        zip,
+        state,
+        email,
+        website,
+      },
+    });
+
+    return res.status(200).json({ clinic: updatedClinic });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: 'Internal server error' });

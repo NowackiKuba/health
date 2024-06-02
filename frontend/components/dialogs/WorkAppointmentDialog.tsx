@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { decryptPesel } from '@/actions/auth.actions';
 import { MdHealthAndSafety, MdMedication } from 'react-icons/md';
 import { ClipboardPlus, Hospital, ReceiptText } from 'lucide-react';
+import { CreatePrescriptionDialog } from './CreatePrescriptionDialog';
 
 interface Props {
   open: boolean;
@@ -18,6 +19,8 @@ const WorkAppointmentDialog = ({ open, setOpen, appointment }: Props) => {
   const [decryptedPesel, setDecryptedPesel] = useState<string>('');
   const [startDate, setStartDate] = useState<Date>(new Date());
   const [endDate, setEndDate] = useState<Date>(new Date());
+  const [isOpenPrescriptionDialog, setIsOpenPrescriptionDialog] =
+    useState<boolean>(false);
   const [seconds, setSeconds] = useState<number>(0);
   const [currentInterval, setCurrentInterval] = useState<NodeJS.Timeout | null>(
     null
@@ -170,7 +173,10 @@ const WorkAppointmentDialog = ({ open, setOpen, appointment }: Props) => {
                   Add Report
                 </p>
               </div>
-              <div className='h-40 w-40 gap-1 rounded-xl cursor-pointer group border border-border flex flex-col items-center justify-center'>
+              <div
+                onClick={() => setIsOpenPrescriptionDialog(true)}
+                className='h-40 w-40 gap-1 rounded-xl cursor-pointer group border border-border flex flex-col items-center justify-center'
+              >
                 <div className='h-20 w-20  rounded-full flex items-center justify-center bg-primary/10 text-primary dark:bg-green-500/20 dark:text-green-200 duration-100 ease-linear'>
                   <ReceiptText className=' h-10 w-10 text-primary dark:text-green-200' />
                 </div>
@@ -222,6 +228,12 @@ const WorkAppointmentDialog = ({ open, setOpen, appointment }: Props) => {
           )}
         </div>
       </DialogContent>
+      <CreatePrescriptionDialog
+        doctor={appointment?.employee}
+        open={isOpenPrescriptionDialog}
+        setOpen={setIsOpenPrescriptionDialog}
+        patient={appointment?.patient}
+      />
     </Dialog>
   );
 };

@@ -21,7 +21,7 @@ const CalendarPage = () => {
     '17:00',
     '18:00',
   ];
-  const { clinic } = useClinic();
+  const { clinic, isLoading } = useClinic();
   useEffect(() => {
     if (view === 'daily') setDays([new Date()]);
     else if (view === 'weekly') {
@@ -50,6 +50,10 @@ const CalendarPage = () => {
       setDays(monthDays);
     }
   }, [view]);
+
+  if (isLoading) {
+    return <p>loading</p>;
+  }
   return (
     <div className='flex flex-col gap-4 w-full'>
       <div className='flex items-center justify-between w-full'>
@@ -107,10 +111,26 @@ const CalendarPage = () => {
       ) : view === 'weekly' ? (
         <div className='flex items-center w-full'>
           {days?.map((day, index) => (
-            <div key={index} className='flex flex-col w-full border'>
+            <div
+              key={index}
+              className='flex xl:min-h-[540px] flex-col w-full border px-2'
+            >
               <div className='py-2 flex w-full flex-col items-center justify-center'>
                 {format(day, 'dd.MM.yyyy')}
               </div>
+              {clinic?.appointments?.map((appointment) => (
+                <div
+                  key={appointment.id}
+                  className={`p-2 flex flex-col rounded-lg bg-primary/10 text-primary dark:bg-green-500/20 dark:text-green-200 ${
+                    format(appointment.date, 'dd.MM.yyyy') ===
+                    format(day, 'dd.MM.yyyy')
+                      ? 'flex'
+                      : 'hidden'
+                  }`}
+                >
+                  <p className='text-sm font-[500]'>Appointment</p>
+                </div>
+              ))}
             </div>
           ))}
         </div>

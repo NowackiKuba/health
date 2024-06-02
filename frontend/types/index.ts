@@ -13,6 +13,9 @@ type TPatient = Patient;
 type TPrescription = Prescription;
 type TVacation = Vacation;
 type TTask = Task;
+type TDocument = Document;
+type TService = Service;
+type TMedicine = Medicine;
 
 interface Clinic {
   id: string;
@@ -31,6 +34,7 @@ interface Clinic {
   appointments: TAppointment[];
   employees: TEmployee[];
   patients: TPatient[];
+  services: TService[];
 }
 
 interface Employee {
@@ -135,4 +139,40 @@ interface Task {
   assignedToId: string;
   clinic: Clinic;
   clinicId: string;
+}
+
+interface Document {
+  id: string;
+  title: string;
+  linkUrl: string;
+  createdAt: Date;
+  updatedAt: Date;
+  clinic: TClinic;
+  clinicId: string;
+  patient: TPatient;
+  patientId?: string;
+  fileSize: number;
+}
+
+interface Service {
+  id: string;
+  name: string;
+  price: number;
+  duration: number;
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  clinic: TClinic;
+  clinicId: string;
+  employees: TEmployee[];
+}
+
+interface Medicine {
+  name: string;
+  quantity: number;
+  dose: string;
+  frequency: string;
+  duration: string;
+  seed: string;
+  discount: number;
 }
