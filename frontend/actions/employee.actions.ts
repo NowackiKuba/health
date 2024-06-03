@@ -88,3 +88,27 @@ export const deleteEmployee = async ({
 
   return res.data;
 };
+
+export const updateEmployeeData = async ({
+  firstName,
+  lastName,
+  email,
+  phone,
+  employeeId,
+}: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  employeeId: string;
+}) => {
+  const res = await axios.post('http://localhost:8080/api/employee/update', {
+    firstName,
+    lastName,
+    email,
+    phone,
+    employeeId,
+  });
+
+  return res.data;
+};

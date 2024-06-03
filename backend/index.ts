@@ -11,6 +11,8 @@ import appointmentRoutes from './routes/appointment.route.ts';
 import taskRoutes from './routes/task.route.ts';
 import documentRoutes from './routes/document.route.ts';
 import serviceRoutes from './routes/service.route.ts';
+import prescriptionRoutes from './routes/prescription.route.ts';
+import diseaseRoutes from './routes/disease.route.ts';
 dotenv.config();
 
 const app = express();
@@ -33,7 +35,9 @@ app.use('/api/employee', employeeRoutes);
 app.use('/api/document', documentRoutes);
 app.use('/api/appointment', appointmentRoutes);
 app.use('/api/service', serviceRoutes);
+app.use('/api/prescription', prescriptionRoutes);
 app.use('/api/task', taskRoutes);
+app.use('/api/disease', diseaseRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

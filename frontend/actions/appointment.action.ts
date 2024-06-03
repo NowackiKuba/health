@@ -112,3 +112,27 @@ export const deleteAppointment = async ({
 
   return res.data;
 };
+
+export const endAppointment = async ({
+  startDate,
+  endDate,
+  appointmentId,
+  duration,
+  report,
+}: {
+  startDate: Date;
+  endDate: Date;
+  appointmentId: string;
+  duration: number;
+  report: string;
+}) => {
+  const res = await axios.post('http://localhost:8080/api/appointment/end', {
+    startDate,
+    endDate,
+    appointmentId,
+    duration,
+    report,
+  });
+
+  return res.data;
+};

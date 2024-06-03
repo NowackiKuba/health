@@ -41,6 +41,7 @@ model Clinic {
   documents Document[]
   services Service[]
   websiteUrl String?
+  prescriptions Prescription[]
 }
 
 model Employee { 
@@ -67,6 +68,7 @@ model Employee {
   createdPatients Patient[]
   createdAppointments Appointment[] @relation("CreatedByRelation")
   services Service[]
+  diagnosedDiseases ChronicDisease[]
 }
 
 
@@ -89,6 +91,7 @@ model Appointment {
   appointmentReason String
   appointmentReport String?
   start      DateTime?
+  duration    Int?
   isNFZ      Boolean @default(false)
   price      Float?
   end         DateTime?
@@ -119,7 +122,8 @@ model Patient {
   zip         String?
   pesel       String 
   dateOfBirth DateTime?
-  chronicDiseases String[]
+  gender     String?
+  chronicDiseases ChronicDisease[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   appointments Appointment[]
@@ -131,15 +135,29 @@ model Patient {
 
 }
 
+
+model ChronicDisease { 
+  id          String   @id @default(cuid())
+  name        String @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  diagnosis   String
+  diagnosedBy Employee @relation(fields: [diagnosedById], references: [id])
+  diagnosedById String
+  patient     Patient  @relation(fields: [patientId], references: [id]) 
+  patientId   String
+}
+
 model Prescription { 
   id          String   @id @default(cuid())
   date        DateTime
-  note        String
   pdfLinkUrl  String
   patient     Patient  @relation(fields: [patientId], references: [id])
   patientId   String
   employee   Employee @relation(fields: [employeeId], references: [id])
   employeeId String
+  clinic     Clinic   @relation(fields: [clinicId], references: [id])
+  clinicId   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

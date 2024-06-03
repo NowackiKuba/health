@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express';
 import { db } from '../db/prisma';
 import CryptoJS from 'crypto-js';
+import { truncate } from 'fs';
 
 export const getPatientById: RequestHandler = async (req, res, next) => {
   try {

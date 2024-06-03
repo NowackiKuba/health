@@ -24,6 +24,7 @@ export const CreatePrescriptionDialog = ({
   const componentRef = useRef();
   const handlePrint = useReactToPrint({
     content: () => componentRef.current!,
+    documentTitle: `Prescription-${patient?.firstName} ${patient?.lastName}`,
   });
   const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
   const handleGenerateSeed = (len: number) => {

@@ -4,8 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { ChevronDown, CirclePlus } from 'lucide-react';
 import { format } from 'date-fns';
+import AppointmentDetailsDialog from '../dialogs/AppointmentDetailsDialog';
 
 const CalendarPage = () => {
+  const [isOpenDetails, setIsOpenDetails] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<TAppointment>();
   const [days, setDays] = useState<Date[]>();
   const [view, setView] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const hours = [
@@ -120,8 +124,12 @@ const CalendarPage = () => {
               </div>
               {clinic?.appointments?.map((appointment) => (
                 <div
+                  onClick={() => {
+                    setSelectedAppointment(appointment);
+                    setIsOpenDetails(true);
+                  }}
                   key={appointment.id}
-                  className={`p-2 flex flex-col rounded-lg bg-primary/10 text-primary dark:bg-green-500/20 dark:text-green-200 ${
+                  className={`p-2 cursor-pointer flex flex-col rounded-lg bg-primary/10 text-primary dark:bg-green-500/20 dark:text-green-200 ${
                     format(appointment.date, 'dd.MM.yyyy') ===
                     format(day, 'dd.MM.yyyy')
                       ? 'flex'
@@ -129,6 +137,9 @@ const CalendarPage = () => {
                   }`}
                 >
                   <p className='text-sm font-[500]'>Appointment</p>
+                  <p className='text-xs'>
+                    {format(appointment.date, 'dd.MM.yyyy')}, {appointment.hour}
+                  </p>
                 </div>
               ))}
             </div>
@@ -146,6 +157,11 @@ const CalendarPage = () => {
           ))}
         </div>
       )}
+      <AppointmentDetailsDialog
+        appointment={selectedAppointment!}
+        open={isOpenDetails}
+        setOpen={setIsOpenDetails}
+      />
     </div>
   );
 };

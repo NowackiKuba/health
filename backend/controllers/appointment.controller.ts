@@ -6,6 +6,20 @@ export const getClinicAppointments: RequestHandler = async (req, res, next) => {
   try {
     const { clinicId } = req.params;
     const { doctorId } = req.query;
+
+    if (!clinicId) {
+      return res.status(400).json({ message: 'Clinic ID is required' });
+    }
+
+    const clinic = await db.clinic.findUnique({
+      where: {
+        id: clinicId,
+      },
+    });
+
+    if (!clinic) {
+      return res.status(404).json({ message: 'Clinic not found' });
+    }
     let appointments;
     if (doctorId) {
       appointments = await db.appointment.findMany({
@@ -16,9 +30,11 @@ export const getClinicAppointments: RequestHandler = async (req, res, next) => {
         include: {
           clinic: true,
           employee: true,
+          service: true,
           patient: {
             include: {
               appointments: true,
+              chronicDiseases: true,
             },
           },
         },
@@ -164,6 +180,28 @@ export const deleteAppointment: RequestHandler = async (req, res, next) => {
     const appointment = await db.appointment.delete({
       where: {
         id: appointmentId,
+      },
+    });
+
+    return res.status(200).json({ appointment });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+export const endAppointment: RequestHandler = async (req, res, next) => {
+  try {
+    const { startDate, endDate, appointmentId, duration, report } = req.body;
+    const appointment = await db.appointment.update({
+      where: {
+        id: appointmentId,
+      },
+      data: {
+        end: endDate,
+        start: startDate,
+        duration,
+        appointmentReport: report,
       },
     });
 

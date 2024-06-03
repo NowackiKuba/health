@@ -272,7 +272,10 @@ const AppointmentsPage = () => {
                       ? ''
                       : 'hidden'
                     : format(appointment?.date, 'dd.MM.yyyy') >=
-                      format(new Date(), 'dd.MM.yyyy')
+                        format(new Date(), 'dd.MM.yyyy') ||
+                      (format(appointment?.date, 'dd.MM.yyyy') ==
+                        format(new Date(), 'dd.MM.yyyy') &&
+                        appointment?.hour > format(new Date(), 'HH:mm'))
                     ? ''
                     : 'hidden'
                 } `}

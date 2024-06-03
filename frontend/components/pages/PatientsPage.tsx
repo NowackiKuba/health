@@ -41,6 +41,8 @@ import { toast } from '../ui/use-toast';
 import { FcExport, FcImport } from 'react-icons/fc';
 import { useUser } from '@/hooks/useUser';
 import CreateAppointmentDialog from '../dialogs/CreateAppointmentDialog';
+import AssignChronicDiseasToPatientDialog from '../dialogs/AssignChronicDiseasToPatientDialog';
+import { FaDisease } from 'react-icons/fa';
 
 const PatientsPage = () => {
   const searchParams = useSearchParams();
@@ -48,6 +50,8 @@ const PatientsPage = () => {
     useState<boolean>(false);
   const [isOpenEdit, setIsOpenEdit] = useState<boolean>(false);
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
+  const [isOpenChronicDisease, setIsOpenChronicDisease] =
+    useState<boolean>(false);
   const [selectedPatientId, setSelectedPatientId] = useState<string>('');
   const { user, isLoading: isLoadingUser } = useUser();
   const { data, isLoading } = useQuery({
@@ -169,6 +173,7 @@ const PatientsPage = () => {
                 <TableHead>Email Address</TableHead>
                 <TableHead>Phone Number</TableHead>
                 <TableHead>PESEL number</TableHead>
+                <TableHead>Chronic Diseases</TableHead>
                 <TableHead className='text-end'>Options</TableHead>
               </TableRow>
             </TableHeader>
@@ -180,6 +185,24 @@ const PatientsPage = () => {
                   <TableCell>{patient.email}</TableCell>
                   <TableCell>{patient.phone || 'No Data'}</TableCell>
                   <TableCell>***********</TableCell>
+                  <TableCell>
+                    <div className='flex items-center gap-1 flex-wrap max-w-[250px]'>
+                      {!patient?.chronicDiseases?.length ? (
+                        <p>No Data</p>
+                      ) : (
+                        <>
+                          {patient?.chronicDiseases?.map((disease) => (
+                            <p
+                              key={disease.id}
+                              className='text-xs bg-red-500/10 dark:bg-red-500/20 dark:text-red-200 text-red-500 px-2 py-1 dark:border-red-700 border-red-500 rounded-sm'
+                            >
+                              {disease.name}
+                            </p>
+                          ))}
+                        </>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell className='flex justify-end'>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -207,6 +230,16 @@ const PatientsPage = () => {
                         >
                           <Eye className='h-4 w-4' />
                           <p>See Details</p>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedPatientId(patient.id);
+                            setIsOpenChronicDisease(true);
+                          }}
+                          className='flex cursor-pointer hover:text-current items-center gap-2 text-sm'
+                        >
+                          <FaDisease className='h-4 w-4' />
+                          <p>Assign Chronic Disease</p>
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => {
@@ -265,6 +298,12 @@ const PatientsPage = () => {
         open={isOpenCreateAppointment}
         setOpen={setIsOpenCreateAppointment}
         patientId={selectedPatientId}
+      />
+      <AssignChronicDiseasToPatientDialog
+        open={isOpenChronicDisease}
+        setOpen={setIsOpenChronicDisease}
+        patientId={selectedPatientId}
+        doctorId={user?.id!}
       />
     </div>
   );

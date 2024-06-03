@@ -116,3 +116,40 @@ export const deleteEmployee: RequestHandler = async (req, res, next) => {
     return res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
+export const updateEmployeeData: RequestHandler = async (req, res, next) => {
+  try {
+    const { employeeId, firstName, lastName, email, phone } = req.body;
+
+    if (!employeeId || !firstName || !lastName || !email || !phone) {
+      return res.status(400).json({ message: 'missing data' });
+    }
+
+    const employee = await db.employee.findUnique({
+      where: {
+        id: employeeId,
+      },
+    });
+
+    if (!employee) {
+      return res.status(404).json({ message: 'employee not found' });
+    }
+
+    const updatedEmployee = await db.employee.update({
+      where: {
+        id: employeeId,
+      },
+      data: {
+        firstName,
+        lastName,
+        email,
+        phone,
+      },
+    });
+
+    return res.status(200).json({ updatedEmployee });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+};

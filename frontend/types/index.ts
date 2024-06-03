@@ -16,6 +16,7 @@ type TTask = Task;
 type TDocument = Document;
 type TService = Service;
 type TMedicine = Medicine;
+type TChronicDisease = ChronicDisease;
 
 interface Clinic {
   id: string;
@@ -86,6 +87,8 @@ interface Appointment {
   price: number;
   hour: string;
   isNFZ: boolean;
+  service: TService;
+  serviceId: string;
 }
 
 interface Patient {
@@ -103,16 +106,20 @@ interface Patient {
   updatedAt: Date;
   appointments: TAppointment[];
   prescriptions: TPrescription[];
+  dateOfBirth: Date;
+  chronicDiseases: TChronicDisease[];
 }
 
 interface Prescription {
   id: string;
   date: Date;
-  note: string;
   patient: TPatient;
   patientId: string;
   employee: TEmployee;
   employeeId: string;
+  pdfLinkUrl: string;
+  clinic: TClinic;
+  clinicId: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -175,4 +182,16 @@ interface Medicine {
   duration: string;
   seed: string;
   discount: number;
+}
+
+interface ChronicDisease {
+  id: string;
+  name: string;
+  diagnosis: string;
+  diagnosedBy: Employee;
+  diagnosedById: string;
+  patient: Patient;
+  patientId: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

@@ -3,6 +3,7 @@ import {
   createAppointment,
   deleteAppointment,
   editAppointment,
+  endAppointment,
   getAppointmentById,
   getClinicAppointments,
 } from '../controllers/appointment.controller';
@@ -13,6 +14,7 @@ router.get('/get-clinic-appointments/:clinicId', getClinicAppointments);
 router.get('/get-appointment', getAppointmentById);
 router.post('/create', createAppointment);
 router.post('/edit', editAppointment);
+router.post('/end', endAppointment);
 router.delete('/delete/:appointmentId', deleteAppointment);
 
 export default router;

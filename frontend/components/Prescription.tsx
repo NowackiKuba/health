@@ -67,29 +67,29 @@ const Prescription = forwardRef(
                 </p>
                 {/* // !Dodac do db kod doktora */}
                 <p>4134242</p>
-                <p>Tel: {doctor.phone}</p>
+                <p>Tel: {doctor?.phone}</p>
               </div>
             </div>
           </div>
           {medicineArray?.map((m, index) => (
             <div
-              key={m.seed}
+              key={m?.seed}
               className='flex flex-col gap-2 text-sm items-start justify-start w-full border-b py-2'
             >
               <div className='flex items-center justify-between w-full'>
                 <p>
-                  Prescription {index + 1} / {medicineArray.length}
+                  Prescription {index + 1} / {medicineArray?.length}
                 </p>
                 <p>{m.seed}</p>
               </div>
               <div className='flex items-center justify-between w-full'>
                 <div className='flex flex-col'>
-                  <p>{m.name}</p>
-                  <p>{m.quantity} pcs</p>
+                  <p>{m?.name}</p>
+                  <p>{m?.quantity} pcs</p>
                 </div>
                 <div className='flex items-start gap-1'>
                   <div className='h-[24px] w-[1.5px] bg-black' />
-                  <p>{m.discount}%</p>
+                  <p>{m?.discount}%</p>
                 </div>
               </div>
               <p>

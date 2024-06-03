@@ -47,6 +47,9 @@ export const getClinicPatients: RequestHandler = async (req, res, next) => {
           },
         },
       },
+      include: {
+        chronicDiseases: true,
+      },
       ...sortOptions,
       take: +(pageSize as string),
       skip: skipAmount,
@@ -182,7 +185,11 @@ export const getCurrentClinic: RequestHandler = async (req, res, next) => {
       include: {
         employees: true,
         patients: true,
-        appointments: true,
+        appointments: {
+          include: {
+            patient: true,
+          },
+        },
         services: true,
       },
     });
