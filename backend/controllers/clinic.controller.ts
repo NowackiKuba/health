@@ -231,10 +231,18 @@ export const getCurrentClinic: RequestHandler = async (req, res, next) => {
       },
       include: {
         employees: true,
-        patients: true,
+        patients: {
+          include: {
+            chronicDiseases: true,
+          },
+        },
         appointments: {
           include: {
-            patient: true,
+            patient: {
+              include: {
+                chronicDiseases: true,
+              },
+            },
           },
         },
         services: true,

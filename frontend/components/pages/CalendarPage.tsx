@@ -2,11 +2,20 @@
 import useClinic from '@/hooks/useClinic';
 import React, { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
-import { ChevronDown, CirclePlus } from 'lucide-react';
+import { ChevronDown, CirclePlus, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import AppointmentDetailsDialog from '../dialogs/AppointmentDetailsDialog';
+import { useRouter, useSearchParams } from 'next/navigation';
+import axios from 'axios';
+import { getCurrentUser } from '@/actions/user.actions';
+import { formUrlQuery } from '@/utils';
 
 const CalendarPage = () => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const doctorId = searchParams.get('doctorId');
+  const [accountType, setAccountType] = useState<string>('');
+  const [currentUserId, setCurrentUserId] = useState<string>('');
   const [isOpenDetails, setIsOpenDetails] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
     useState<TAppointment>();
@@ -55,9 +64,31 @@ const CalendarPage = () => {
     }
   }, [view]);
 
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const res = await getCurrentUser();
+      if (res.accountType.toString().toLowerCase() === 'doctor' && !doctorId) {
+        const newUrl = formUrlQuery({
+          key: 'doctorId',
+          value: res.user.id,
+          params: searchParams.toString(),
+        });
+        setAccountType(res.accountType.toString().toLowerCase());
+        router.push(newUrl, { scroll: false });
+      }
+    };
+    fetchCurrentUser();
+  }, []);
+
   if (isLoading) {
-    return <p>loading</p>;
+    return (
+      <div className='w-full mt-12 flex flex-col items-center justify-center'>
+        <Loader2 className='text-primary h-40 w-40 animate-spin' />
+        <p>Loading Calendar</p>
+      </div>
+    );
   }
+
   return (
     <div className='flex flex-col gap-4 w-full'>
       <div className='flex items-center justify-between w-full'>
@@ -103,12 +134,45 @@ const CalendarPage = () => {
       </div>
       {view === 'daily' ? (
         <div className='flex flex-col w-full'>
-          {hours?.map((hour, index) => (
+          {hours.map((hour, hourIndex) => (
             <div
-              key={`${hour}-${index}`}
-              className='flex items-end h-[120px] w-full border-b'
+              className='flex items-start w-full border-b h-[120px]'
+              key={hourIndex}
             >
-              {hour}
+              <p>{hour}</p>
+              {clinic?.appointments?.map((appointment) => {
+                return (
+                  <div
+                    onClick={() => {
+                      setSelectedAppointment(appointment);
+                      setIsOpenDetails(true);
+                    }}
+                    key={appointment.id}
+                    className={`${
+                      doctorId
+                        ? doctorId === appointment.employeeId
+                          ? 'flex'
+                          : 'hidden'
+                        : 'flex'
+                    } p-2 cursor-pointer h-[102px] ml-2 mt-2 flex flex-col rounded-lg bg-primary/10 text-primary dark:bg-green-500/20 dark:text-green-200 ${
+                      appointment.hour === hour &&
+                      format(appointment.date, 'dd.MM.yyyy') ===
+                        format(new Date(), 'dd.MM.yyyy')
+                        ? 'flex'
+                        : 'hidden'
+                    }`}
+                  >
+                    <p className='text-sm font-[500]'>
+                      {appointment?.employeeId}{' '}
+                      {appointment?.employee?.lastName}
+                    </p>
+                    <p className='text-xs'>
+                      {format(appointment.date, 'dd.MM.yyyy')},{' '}
+                      {appointment.hour}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           ))}
         </div>
@@ -117,7 +181,7 @@ const CalendarPage = () => {
           {days?.map((day, index) => (
             <div
               key={index}
-              className='flex xl:min-h-[540px] flex-col w-full border px-2'
+              className='flex xl:min-h-[540px] flex-col gap-1 w-full border px-2'
             >
               <div className='py-2 flex w-full flex-col items-center justify-center'>
                 {format(day, 'dd.MM.yyyy')}

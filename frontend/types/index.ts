@@ -58,6 +58,7 @@ interface Employee {
   vacationId?: string | null;
   prescriptions: TPrescription[];
   hideDock: boolean;
+  tasks: TTask[];
 }
 
 interface Specialization {

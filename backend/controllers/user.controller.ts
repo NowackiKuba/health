@@ -15,7 +15,11 @@ export const getCurrentUser: RequestHandler = async (req, res, next) => {
       },
       include: {
         clinic: true,
-        appointments: true,
+        appointments: {
+          include: {
+            patient: true,
+          },
+        },
       },
     });
     if (!user) {
