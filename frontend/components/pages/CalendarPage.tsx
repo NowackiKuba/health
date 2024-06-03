@@ -62,7 +62,7 @@ const CalendarPage = () => {
     <div className='flex flex-col gap-4 w-full'>
       <div className='flex items-center justify-between w-full'>
         <p className='text-3xl font-semibold'>Calendar</p>
-        <div className='flex items-center justify-center gap-2'>
+        {/* <div className='flex items-center justify-center gap-2'>
           <Button
             className='flex items-center gap-2'
             // onClick={() => setIsOpenCreate(true)}
@@ -77,7 +77,7 @@ const CalendarPage = () => {
             <p>Actions</p>
             <ChevronDown className='h-5 w-5' />
           </Button>
-        </div>
+        </div> */}
       </div>
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2'>

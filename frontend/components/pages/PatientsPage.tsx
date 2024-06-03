@@ -4,6 +4,8 @@ import { Button } from '../ui/button';
 import {
   CalendarPlus,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   CirclePlus,
   Edit,
   Eye,
@@ -156,7 +158,7 @@ const PatientsPage = () => {
           />
         </div>
       </div>
-      <div className='flex items-center w-full gap-2 flex-wrap'>
+      <div className='md:flex hidden items-center w-full gap-2 flex-wrap'>
         {!data?.patients || !data?.patients?.length ? (
           <div className='flex flex-col mt-12 w-full items-center justify-center gap-2'>
             <Ghost className='h-20 w-20 dark:text-gray-600 text-gray-400' />
@@ -273,6 +275,57 @@ const PatientsPage = () => {
               ))}
             </TableBody>
           </Table>
+        )}
+      </div>
+      <div className='flex md:hidden sm:flex-row flex-col flex-wrap sm:items-center items-start justify-start gap-1 w-full'>
+        {!data?.patients || !data?.patients?.length ? (
+          <div className='flex flex-col mt-12 w-full items-center justify-center gap-2'>
+            <Ghost className='h-20 w-20 dark:text-gray-600 text-gray-400' />
+            <p className='font-semibold dark:text-gray-600 text-gray-400'>
+              No Patients
+            </p>
+          </div>
+        ) : (
+          <>
+            {data?.patients?.map((patient) => (
+              <div
+                onClick={() => {
+                  setSelectedPatientId(patient.id);
+                  setIsOpenDetails(true);
+                }}
+                key={patient.id}
+                className='flex p-2 sm:items-start items-center sm:flex-col flex-row justify-between sm:justify-start gap-2 w-full sm:w-[calc(50vw-10px)] bg-secondary rounded-xl'
+              >
+                <div className='flex items-center sm:items-start gap-1'>
+                  <div className='sm:h-24 h-16 w-16 sm:w-24 bg-primary/10 font-semibold text-primary dark:bg-green-500/20 dark:text-green-200 flex items-center justify-center rounded-xl text-3xl sm:text-2xl'>
+                    {patient.firstName[0]}
+                    {patient?.lastName[0]}
+                  </div>
+                  <div className='hidden sm:flex flex-wrap items-center gap-2 ml-2 mt-1'>
+                    {patient?.chronicDiseases?.map((disease) => (
+                      <p
+                        key={disease.id}
+                        className='px-2 py-1 rounded-sm dark:bg-red-500/20 dark:text-red-200 border border-red-500 bg-red-500/10 text-red-500 text-sm'
+                      >
+                        {disease.name}
+                      </p>
+                    ))}
+                  </div>
+                  <div className='flex flex-col'>
+                    <p className='sm:hidden flex text-xl font-semibold'>
+                      {patient?.firstName} {patient?.lastName}
+                    </p>
+                  </div>
+                </div>
+                <div className='sm:flex hidden flex-col gap-1 w-full'>
+                  <p className='font-semibold text-2xl'>
+                    {patient?.firstName} {patient?.lastName}
+                  </p>
+                </div>
+                <ChevronRight className='sm:hidden flex' />
+              </div>
+            ))}
+          </>
         )}
       </div>
       <div className='flex items-center justify-start w-full'>

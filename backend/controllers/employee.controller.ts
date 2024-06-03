@@ -49,7 +49,11 @@ export const getEmployeeById: RequestHandler = async (req, res, next) => {
         id: employeeId,
       },
       include: {
-        appointments: true,
+        appointments: {
+          include: {
+            patient: true,
+          },
+        },
       },
     });
 

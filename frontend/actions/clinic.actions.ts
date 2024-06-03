@@ -52,16 +52,35 @@ export const createPatientAccount = async ({
   return res.data.patient;
 };
 
-export const getClinicEmployees = async () => {
+export const getClinicEmployees = async ({
+  page,
+  pageSize,
+  filter,
+  sort,
+}: {
+  page: number;
+  pageSize: number;
+  filter?: string;
+  sort?: string;
+}) => {
   const user = await getCurrentUser();
+  if (filter) {
+    const res = await axios.get(
+      `http://localhost:8080/api/clinic/get-employees/${user?.user?.clinicId}?sort=${sort}&page=${page}&pageSize=${pageSize}&filter=${filter}`
+    );
 
-  const res = await axios.get(
-    `http://localhost:8080/api/clinic/get-employees/${user?.user?.clinicId}`
-  );
+    const employees = (await res.data.employees) as TEmployee[];
+    const isNext = res.data.isNext;
+    return { employees, isNext };
+  } else {
+    const res = await axios.get(
+      `http://localhost:8080/api/clinic/get-employees/${user?.user?.clinicId}?sort=${sort}&page=${page}&pageSize=${pageSize}`
+    );
 
-  const employees = (await res.data.employees) as TEmployee[];
-  const isNext = false;
-  return { employees, isNext };
+    const employees = (await res.data.employees) as TEmployee[];
+    const isNext = res.data.isNext;
+    return { employees, isNext };
+  }
 };
 
 export const getCurrentClinic = async (): Promise<TClinic> => {

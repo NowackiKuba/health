@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express';
 import { db } from '../db/prisma';
 import CryptoJS from 'crypto-js';
+import { Role } from '@prisma/client';
 
 export const getClinicPatients: RequestHandler = async (req, res, next) => {
   try {
@@ -160,14 +161,60 @@ export const createPatientAccount: RequestHandler = async (req, res, next) => {
 export const getClinicEmployees: RequestHandler = async (req, res, next) => {
   try {
     const { clinicId } = req.params;
+    const { sort, page, pageSize, filter } = req.query;
 
-    const employees = await db.employee.findMany({
-      where: {
-        clinicId,
-      },
-    });
+    const skipAmount = (+(page as string) - 1) * +(pageSize as string);
 
-    return res.status(200).json({ employees });
+    let sortOptions = {};
+
+    if (sort) {
+      switch (sort) {
+        case 'newest':
+          sortOptions = { orderBy: { createdAt: 'desc' } };
+          break;
+        case 'oldest':
+          sortOptions = { orderBy: { createdAt: 'asc' } };
+          break;
+      }
+    }
+    let employees: any[] = [];
+    let totalEmployees = 0;
+    if (!filter) {
+      employees = await db.employee.findMany({
+        where: {
+          clinicId,
+        },
+        ...sortOptions,
+        take: +(pageSize as string),
+        skip: skipAmount,
+      });
+
+      totalEmployees = await db.employee.count({
+        where: {
+          clinicId,
+        },
+      });
+    } else {
+      employees = await db.employee.findMany({
+        where: {
+          clinicId,
+          role: (filter as string).toUpperCase() as Role,
+        },
+        ...sortOptions,
+        take: +(pageSize as string),
+        skip: skipAmount,
+      });
+      totalEmployees = await db.employee.count({
+        where: {
+          clinicId,
+          role: (filter as string).toUpperCase() as Role,
+        },
+      });
+    }
+
+    const isNext = totalEmployees > skipAmount + employees.length;
+
+    return res.status(200).json({ employees, isNext });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: 'Internal server error' });

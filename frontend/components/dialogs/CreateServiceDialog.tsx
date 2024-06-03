@@ -80,7 +80,7 @@ const CreateServiceDialog = ({ open, setOpen }: Props) => {
 
         <div className='flex flex-col w-full gap-0.5'>
           <Label>Employees</Label>
-          <Command>
+          <Command className='bg-secondary'>
             <CommandInput placeholder='Search for employees' />
             <CommandList defaultChecked={false}>
               <CommandEmpty>No results found.</CommandEmpty>
