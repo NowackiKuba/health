@@ -41,9 +41,9 @@ export const createPatientAccount = async ({
 }) => {
   const user = await getCurrentUser();
 
-  const res = await axios.post(
-    `http://localhost:8080/api/clinic/create-patient`,
-    {
+  const res = await axios(`http://localhost:8080/api/clinic/create-patient`, {
+    method: 'POST',
+    data: {
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
@@ -55,8 +55,11 @@ export const createPatientAccount = async ({
       state: data.state,
       clinicId: user?.user?.clinicId,
       createdById: user?.user?.id,
-    }
-  );
+    },
+    headers: {
+      Authorization: cookies().get('token')?.value,
+    },
+  });
 
   return res.data.patient;
 };
