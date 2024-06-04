@@ -3,7 +3,7 @@ import React from 'react';
 
 const page = () => {
   return (
-    <div className='w-full xl:px-16 '>
+    <div className='w-full xl:px-16 mt-4'>
       <DashboardPage />
     </div>
   );

@@ -20,7 +20,7 @@ export const dockLinks = [
     path: '/dashboard/patients',
     icon: FcCollaboration,
   },
-  { id: 3, name: 'Calendar', path: '/dashboard/calendar', icon: FcCalendar },
+  // { id: 3, name: 'Calendar', path: '/dashboard/calendar', icon: FcCalendar },
   {
     id: 4,
     name: 'Appointments',

@@ -8,7 +8,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
       <section className='w-full'>
         <Navbar />
       </section>
-      <section className='h-[calc(100vh-148px)] w-full'>{children}</section>
+      <section className='h-[calc(100vh-157px)] w-full'>{children}</section>
       <section className='w-full'>
         <Dock />
       </section>

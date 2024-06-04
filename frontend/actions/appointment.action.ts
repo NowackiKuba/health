@@ -3,15 +3,26 @@
 import axios from 'axios';
 import { getCurrentUser } from './user.actions';
 import { create } from 'domain';
+import { getTokenValue } from './auth.actions';
 
 export const getClinicAppointments = async ({
   doctorId,
 }: {
   doctorId?: string;
 }): Promise<TAppointment[]> => {
+  const token = await getTokenValue();
+  if (!token) {
+    return [];
+  }
   const user = await getCurrentUser();
-  const res = await axios.get(
-    `http://localhost:8080/api/appointment/get-clinic-appointments/${user?.user?.clinicId}?doctorId=${doctorId}`
+  const res = await axios(
+    `http://localhost:8080/api/appointment/get-clinic-appointments/${user?.user?.clinicId}?doctorId=${doctorId}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: token,
+      },
+    }
   );
 
   return res.data.appointments;

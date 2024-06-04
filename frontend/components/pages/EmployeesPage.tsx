@@ -77,6 +77,8 @@ const EmployeesPage = () => {
       }),
   });
 
+  console.log(data);
+
   const queryClient = useQueryClient();
   const { mutate: deleteEmployeeMutation, isPending: isDeleting } = useMutation(
     {

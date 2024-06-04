@@ -3,6 +3,8 @@
 import axios from 'axios';
 import { getCurrentUser } from './user.actions';
 import { ICreatePatientData } from '@/components/dialogs/CreatePatientDialog';
+import { cookies } from 'next/headers';
+import { getTokenValue } from './auth.actions';
 
 export const getClinicPatients = async ({
   search,
@@ -15,10 +17,17 @@ export const getClinicPatients = async ({
   pageSize: number;
   sort?: string;
 }) => {
+  const token = await getTokenValue();
   const user = await getCurrentUser();
 
-  const res = await axios.get(
-    `http://localhost:8080/api/clinic/get-patients/${user?.user?.clinicId}?search=${search}&page=${page}&pageSize=${pageSize}&sort=${sort}`
+  const res = await axios(
+    `http://localhost:8080/api/clinic/get-patients/${user?.user?.clinicId}?search=${search}&page=${page}&pageSize=${pageSize}&sort=${sort}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: token,
+      },
+    }
   );
   const patients = (await res.data.patients) as TPatient[];
   const isNext = (await res.data.isNext) as boolean;
@@ -64,6 +73,7 @@ export const getClinicEmployees = async ({
   sort?: string;
 }) => {
   const user = await getCurrentUser();
+  const token = cookies().get('token');
   if (filter) {
     const res = await axios.get(
       `http://localhost:8080/api/clinic/get-employees/${user?.user?.clinicId}?sort=${sort}&page=${page}&pageSize=${pageSize}&filter=${filter}`
@@ -73,8 +83,14 @@ export const getClinicEmployees = async ({
     const isNext = res.data.isNext;
     return { employees, isNext };
   } else {
-    const res = await axios.get(
-      `http://localhost:8080/api/clinic/get-employees/${user?.user?.clinicId}?sort=${sort}&page=${page}&pageSize=${pageSize}`
+    const res = await axios(
+      `http://localhost:8080/api/clinic/get-employees/${user?.user?.clinicId}?sort=${sort}&page=${page}&pageSize=${pageSize}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: token!.value,
+        },
+      }
     );
 
     const employees = (await res.data.employees) as TEmployee[];
@@ -84,9 +100,16 @@ export const getClinicEmployees = async ({
 };
 
 export const getCurrentClinic = async (): Promise<TClinic> => {
+  const token = cookies().get('token');
   const user = await getCurrentUser();
-  const res = await axios.get(
-    `http://localhost:8080/api/clinic/get-current-clinic/${user?.user?.clinicId}`
+  const res = await axios(
+    `http://localhost:8080/api/clinic/get-current-clinic/${user?.user?.clinicId}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: token!.value,
+      },
+    }
   );
 
   return res.data.clinic;
