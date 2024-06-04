@@ -7,13 +7,18 @@ import {
   getClinicPatients,
   getCurrentClinic,
 } from '../controllers/clinic.controller';
+import { validateCredentials } from '../middlewares/auth.middleware';
 
 const router = express.Router();
 
-router.get('/get-patients/:clinicId', getClinicPatients);
-router.get('/get-employees/:clinicId', getClinicEmployees);
-router.get('/get-current-clinic/:clinicId', getCurrentClinic);
-router.post('/create-patient', createPatientAccount);
-router.post('/edit', editClinic);
+router.get('/get-patients/:clinicId', validateCredentials, getClinicPatients);
+router.get('/get-employees/:clinicId', validateCredentials, getClinicEmployees);
+router.get(
+  '/get-current-clinic/:clinicId',
+  validateCredentials,
+  getCurrentClinic
+);
+router.post('/create-patient', validateCredentials, createPatientAccount);
+router.post('/edit', validateCredentials, editClinic);
 
 export default router;
