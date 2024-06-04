@@ -80,7 +80,7 @@ const SettingsPage = () => {
       },
     });
   return (
-    <div className='flex flex-col gap-4 w-full xl:max-h-[650px] overflow-y-auto'>
+    <div className='flex flex-col gap-4 w-full xl:max-h-[650px] lg:max-h-[550px] sm:max-h-[540px] sm:pb-0 pb-4 max-h-screen overflow-y-auto'>
       <p className='text-4xl font-semibold'>Settings</p>
       {accountType?.toString().toLowerCase() === 'admin' && (
         <div className='xl:max-w-[640px] bg-secondary rounded-xl p-3 flex flex-col gap-6 w-full'>

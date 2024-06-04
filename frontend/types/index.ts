@@ -78,6 +78,7 @@ interface Appointment {
   employeeId: string;
   patient: TPatient;
   patientId: string;
+  status: string;
   createdAt: Date;
   updatedAt: Date;
   clinic: TClinic;

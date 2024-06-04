@@ -110,7 +110,7 @@ const PatientsPage = () => {
         <p className='text-3xl font-semibold'>Patients</p>
         <div className='flex items-center justify-center gap-2'>
           <Button
-            className='flex items-center gap-1'
+            className='hidden sm:flex items-center gap-1'
             onClick={() => setIsOpenCreate(true)}
           >
             <CirclePlus className='h-5 w-5' />
@@ -127,6 +127,13 @@ const PatientsPage = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
+              <DropdownMenuItem
+                className='sm:hidden flex items-center gap-2 text-sm'
+                onClick={() => setIsOpenCreate(true)}
+              >
+                <CirclePlus className='h-5 w-5' />
+                <p>Create Patient</p>
+              </DropdownMenuItem>
               <DropdownMenuItem className='flex items-center gap-2 text-sm'>
                 <FcImport className='h-5 w-5' />
                 <p>Import from CSV</p>

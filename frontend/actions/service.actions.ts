@@ -2,6 +2,7 @@
 
 import axios from 'axios';
 import { getCurrentClinic } from './clinic.actions';
+import { RequestHandler } from 'uploadthing/internal/types';
 
 export const createService = async ({
   name,
@@ -37,4 +38,41 @@ export const getClinicServices = async (): Promise<TService[]> => {
   );
 
   return res.data.services;
+};
+
+export const editService = async ({
+  serviceId,
+  name,
+  description,
+  price,
+  duration,
+  employeesIds,
+}: {
+  serviceId: string;
+  name: string;
+  description: string;
+  price: number;
+  duration: number;
+  employeesIds: string[];
+}) => {
+  const res = await axios.patch(
+    `http://localhost:8080/api/service/edit/${serviceId}`,
+    {
+      name,
+      description,
+      price,
+      duration,
+      employeesIds,
+    }
+  );
+
+  return res.data;
+};
+
+export const deleteService = async ({ serviceId }: { serviceId: string }) => {
+  const res = await axios.delete(
+    `http://localhost:8080/api/service/delete/${serviceId}`
+  );
+
+  return res.data;
 };

@@ -24,9 +24,18 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { Button } from '../ui/button';
-import { ExternalLink, Loader2, Settings, Trash } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronRight,
+  ExternalLink,
+  Loader2,
+  ReceiptText,
+  Settings,
+  Trash,
+} from 'lucide-react';
 import Link from 'next/link';
 import { toast } from '../ui/use-toast';
+import { FcExport, FcImport } from 'react-icons/fc';
 
 const PrescriptionsPage = () => {
   const { data: prescriptions, isLoading } = useQuery({
@@ -57,12 +66,37 @@ const PrescriptionsPage = () => {
       });
     },
   });
+
+  if (isLoading) {
+    return;
+  }
   return (
     <div className='flex flex-col gap-4 w-full'>
       <div className='flex items-center justify-between'>
         <p className='text-2xl font-semibold'>Prescriptions</p>
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <Button
+              variant={'primary-outline'}
+              className='flex items-center gap-2'
+            >
+              <p>Actions</p>
+              <ChevronDown />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem className='flex items-center gap-2 cursor-pointer'>
+              <FcImport className='h-4 w-4' />
+              <p>Import to CSV</p>
+            </DropdownMenuItem>
+            <DropdownMenuItem className='flex items-center gap-2 cursor-pointer'>
+              <FcExport className='h-4 w-4' />
+              <p>Export from CSV</p>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-      <div className='flex items-center w-full gap-2'>
+      <div className='flex md:flex-row flex-col items-center w-full gap-2'>
         <Searchbar
           otherClasses='xl:max-w-[400px]'
           route='/dashboard/prescriptions'
@@ -79,7 +113,7 @@ const PrescriptionsPage = () => {
           otherClasses='xl:max-w-[220px]'
         />
       </div>
-      <div className='w-full'>
+      <div className='w-full md:flex hidden'>
         <Table>
           <TableHeader>
             <TableRow>
@@ -141,6 +175,47 @@ const PrescriptionsPage = () => {
             ))}
           </TableBody>
         </Table>
+      </div>
+      <div className='flex md:hidden sm:flex-row flex-col items-center gap-2'>
+        {prescriptions?.map((p, index) => (
+          <Link
+            href={p.pdfLinkUrl}
+            target='_blank'
+            key={p.id}
+            className='w-full sm:w-[calc(50%-4px)] p-2 bg-secondary rounded-xl flex items-center justify-between'
+          >
+            <div className='flex items-center gap-2'>
+              <div className='rounded-md h-16 w-16 flex items-center justify-center bg-primary/10 text-primary dark:bg-green-500/20 dark:text-green-200'>
+                <ReceiptText className='h-8 w-8' />
+              </div>
+              <div className='flex flex-col h-16 justify-between'>
+                <p className='text-sm font-semibold'>
+                  #{index + 1} Prescription
+                </p>
+
+                <p className='text-xs dark:text-gray-600 text-gray-400'>
+                  Issued By:{' '}
+                  <span className='font-[500]'>
+                    {p.employee.firstName} {p.employee.lastName}
+                  </span>
+                </p>
+                <p className='text-xs dark:text-gray-600 text-gray-400'>
+                  Issued At:{' '}
+                  <span className='font-[500]'>
+                    {format(p.createdAt, 'dd.MM.yyyy')}
+                  </span>
+                </p>
+                <p className='text-xs dark:text-gray-600 text-gray-400'>
+                  Issued For:{' '}
+                  <span className='font-[500]'>
+                    {p.patient.firstName} {p.patient.lastName}
+                  </span>
+                </p>
+              </div>
+            </div>
+            <ChevronRight className='h-6 w-6' />
+          </Link>
+        ))}
       </div>
     </div>
   );

@@ -1,33 +1,32 @@
-import React, { Dispatch, SetStateAction, useState } from 'react';
+'use client';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { Dialog, DialogContent } from '../ui/dialog';
-import useClinic from '@/hooks/useClinic';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import {
   Command,
-  CommandDialog,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
-  CommandShortcut,
-} from '@/components/ui/command';
+} from '../ui/command';
+import useClinic from '@/hooks/useClinic';
+import { Check, Trash } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
-import { Check, Trash } from 'lucide-react';
-import { useMutation } from '@tanstack/react-query';
-import { createService } from '@/actions/service.actions';
-import { toast } from '../ui/use-toast';
 import ButtonLoading from '../ButtonLoading';
+import { useMutation } from '@tanstack/react-query';
+import { editService } from '@/actions/service.actions';
+import { toast } from '../ui/use-toast';
 
 interface Props {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
+  service: TService;
 }
 
-const CreateServiceDialog = ({ open, setOpen }: Props) => {
+const EditServiceDialog = ({ service, open, setOpen }: Props) => {
   const { clinic } = useClinic();
   const [name, setName] = useState<string>('');
   const [duration, setDuration] = useState<number>(0);
@@ -35,25 +34,36 @@ const CreateServiceDialog = ({ open, setOpen }: Props) => {
   const [description, setDescription] = useState<string>('');
   const [selectedEmployees, setSelectedEmployees] = useState<TEmployee[]>([]);
 
-  const { mutate: createServiceMutation, isPending: isCreating } = useMutation({
-    mutationKey: ['createService'],
-    mutationFn: createService,
+  const { mutate: editServiceMutation, isPending: isEditing } = useMutation({
+    mutationKey: ['editService'],
+    mutationFn: editService,
     onSuccess: () => {
       setOpen(false);
       toast({
-        title: 'Successfully created service',
+        title: 'Successfully edited service',
         duration: 1500,
       });
     },
     onError: () => {
       toast({
-        title: 'Failed to create service',
+        title: 'Failed to edit service',
         duration: 1500,
         description: 'Please try again later',
         variant: 'destructive',
       });
     },
   });
+
+  useEffect(() => {
+    if (!service) return;
+
+    setName(service.name);
+    setDuration(service.duration);
+    setPrice(service.price);
+    setDescription(service.description || '');
+    setSelectedEmployees(service.employees);
+  }, [service]);
+
   return (
     <Dialog
       open={open}
@@ -67,20 +77,32 @@ const CreateServiceDialog = ({ open, setOpen }: Props) => {
         <p className='text-xl font-semibold'>Add Service</p>
         <div className='flex flex-col w-full gap-0.5'>
           <Label>Name</Label>
-          <Input onChange={(e) => setName(e.target.value)} />
+          <Input
+            onChange={(e) => setName(e.target.value)}
+            defaultValue={name}
+          />
         </div>
         <div className='flex flex-col w-full gap-0.5'>
           <Label>Estimated Duration</Label>
-          <Input onChange={(e) => setDuration(+e.target.value)} />
+          <Input
+            onChange={(e) => setDuration(+e.target.value)}
+            defaultValue={duration}
+          />
         </div>
         <div className='flex flex-col w-full gap-0.5'>
           <Label>Price</Label>
-          <Input onChange={(e) => setPrice(+e.target.value)} />
+          <Input
+            onChange={(e) => setPrice(+e.target.value)}
+            defaultValue={price}
+          />
         </div>
 
         <div className='flex flex-col w-full gap-0.5'>
           <Label>Employees</Label>
-          <Command className='bg-background border border-border'>
+          <Command
+            className='bg-secondary'
+            defaultValue={selectedEmployees.map((se) => se.id)}
+          >
             <CommandInput placeholder='Search for employees' />
             <CommandList defaultChecked={false}>
               <CommandEmpty>No results found.</CommandEmpty>
@@ -113,10 +135,10 @@ const CreateServiceDialog = ({ open, setOpen }: Props) => {
               </CommandGroup>
             </CommandList>
           </Command>
-          <div className='flex items-center mt-2 flex-wrap gap-1'>
+          <div className='flex items-center flex-wrap gap-1'>
             {selectedEmployees?.map((employee) => (
               <div
-                className='bg-primary/10 text-primary dark:bg-green-500/20 dark:text-green-200 p-2 rounded-md gap-3  text-sm flex justify-between'
+                className='bg-secondary py-1 px-2 gap-3  text-xs flex justify-between'
                 key={employee.id}
               >
                 <p>
@@ -136,23 +158,26 @@ const CreateServiceDialog = ({ open, setOpen }: Props) => {
         </div>
         <div className='flex flex-col w-full gap-0.5'>
           <Label>Description</Label>
-          <Textarea onChange={(e) => setDescription(e.target.value)} />
+          <Textarea
+            onChange={(e) => setDescription(e.target.value)}
+            defaultValue={description}
+          />
         </div>
         <div className='flex items-center gap-2 w-full'>
           <Button
             variant={'primary-outline'}
             className='w-full'
             onClick={() => setOpen(false)}
-            disabled={isCreating}
+            disabled={isEditing}
           >
             Cancel
           </Button>
           <Button
             className='w-full'
-            disabled={isCreating}
+            disabled={isEditing}
             onClick={() => {
-              createServiceMutation({
-                clinicId: clinic?.id!,
+              editServiceMutation({
+                serviceId: service.id,
                 description,
                 duration,
                 employeesIds: selectedEmployees.map((emp) => emp.id),
@@ -161,7 +186,7 @@ const CreateServiceDialog = ({ open, setOpen }: Props) => {
               });
             }}
           >
-            <ButtonLoading isLoading={isCreating} buttonText='Create' />
+            <ButtonLoading isLoading={isEditing} buttonText='Edit' />
           </Button>
         </div>
       </DialogContent>
@@ -169,4 +194,4 @@ const CreateServiceDialog = ({ open, setOpen }: Props) => {
   );
 };
 
-export default CreateServiceDialog;
+export default EditServiceDialog;

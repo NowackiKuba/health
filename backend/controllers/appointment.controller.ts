@@ -119,7 +119,6 @@ export const createAppointment: RequestHandler = async (req, res, next) => {
 export const editAppointment: RequestHandler = async (req, res, next) => {
   try {
     const {
-      appointmentId,
       employeeId,
       patientId,
       date,
@@ -127,6 +126,29 @@ export const editAppointment: RequestHandler = async (req, res, next) => {
       appointmentType,
       appointmentReason,
     } = req.body;
+
+    const { appointmentId } = req.params;
+
+    if (
+      !employeeId ||
+      !patientId ||
+      !date ||
+      !note ||
+      !appointmentType ||
+      !appointmentReason
+    ) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    const appointment = await db.appointment.findUnique({
+      where: {
+        id: appointmentId,
+      },
+    });
+
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found' });
+    }
 
     const updatedAppointment = await db.appointment.update({
       where: {
@@ -202,6 +224,7 @@ export const endAppointment: RequestHandler = async (req, res, next) => {
         start: startDate,
         duration,
         appointmentReport: report,
+        status: 'FINISHED',
       },
     });
 

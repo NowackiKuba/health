@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { format, set } from 'date-fns';
 import axios from 'axios';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { decryptPesel } from '@/actions/auth.actions';
 import { MdHealthAndSafety, MdMedication } from 'react-icons/md';
 import {
@@ -18,6 +18,8 @@ import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { endAppointment } from '@/actions/appointment.action';
 import { toast } from '../ui/use-toast';
+import HospitalReferall from '../HospitalReferall';
+import { useReactToPrint } from 'react-to-print';
 
 interface Props {
   open: boolean;
@@ -26,6 +28,11 @@ interface Props {
 }
 
 const WorkAppointmentDialog = ({ open, setOpen, appointment }: Props) => {
+  const componentRef = useRef();
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current!,
+    documentTitle: `Hospital Referral-${appointment?.patient?.firstName} ${appointment?.patient?.lastName}`,
+  });
   const [report, setReport] = useState<string>('');
   const [decryptedPesel, setDecryptedPesel] = useState<string>('');
   const [endDate, setEndDate] = useState<Date>(new Date());
@@ -54,6 +61,7 @@ const WorkAppointmentDialog = ({ open, setOpen, appointment }: Props) => {
   }, [currentInterval]);
 
   const handleStopAppointment = () => {
+    setOpen(false);
     clearInterval(currentInterval!);
     setEndDate(new Date(seconds * 1000));
     setCurrentInterval(null);
@@ -69,12 +77,17 @@ const WorkAppointmentDialog = ({ open, setOpen, appointment }: Props) => {
       '0'
     )}:${String(secs).padStart(2, '0')}`;
   };
-
+  const queryClient = useQueryClient();
   const { mutate: endAppointmentMutation, isPending: isDeleting } = useMutation(
     {
       mutationKey: ['endAppointment'],
       mutationFn: endAppointment,
       onSuccess: () => {
+        queryClient.invalidateQueries({
+          // queryKey: ['getAppointments', { doctorId: appointment?.employee?.id }],
+          queryKey: ['getAppointments'],
+          refetchType: 'all',
+        });
         toast({
           title: 'Appointment Ended',
           duration: 1500,
@@ -198,7 +211,18 @@ const WorkAppointmentDialog = ({ open, setOpen, appointment }: Props) => {
 
             <div className='flex items-center gap-2 w-full flex-wrap'>
               <Dialog>
-                <DialogTrigger>
+                <DialogTrigger
+                  disabled={seconds == 0}
+                  onClick={() => {
+                    if (seconds == 0) {
+                      toast({
+                        title: 'Appointment has not started yet',
+                        duration: 1500,
+                        variant: 'destructive',
+                      });
+                    }
+                  }}
+                >
                   <div className='h-40 w-48 gap-1 rounded-xl cursor-pointer group border border-border flex flex-col items-center justify-center'>
                     <div className='h-20 w-20  rounded-full flex items-center justify-center bg-primary/10 text-primary dark:bg-green-500/20 dark:text-green-200 duration-100 ease-linear'>
                       <ClipboardPlus className=' h-10 w-10 text-primary dark:text-green-200' />
@@ -233,7 +257,17 @@ const WorkAppointmentDialog = ({ open, setOpen, appointment }: Props) => {
                 </DialogContent>
               </Dialog>
               <div
-                onClick={() => setIsOpenPrescriptionDialog(true)}
+                onClick={() => {
+                  if (seconds == 0) {
+                    toast({
+                      title: 'Appointment has not started yet',
+                      duration: 1500,
+                      variant: 'destructive',
+                    });
+                    return;
+                  }
+                  setIsOpenPrescriptionDialog(true);
+                }}
                 className='h-40 w-48 gap-1 rounded-xl cursor-pointer group border border-border flex flex-col items-center justify-center'
               >
                 <div className='h-20 w-20  rounded-full flex items-center justify-center bg-primary/10 text-primary dark:bg-green-500/20 dark:text-green-200 duration-100 ease-linear'>
@@ -243,7 +277,20 @@ const WorkAppointmentDialog = ({ open, setOpen, appointment }: Props) => {
                   Add Prescription
                 </p>
               </div>
-              <div className='h-40 w-48 gap-1 rounded-xl cursor-pointer group border border-border flex flex-col items-center justify-center'>
+              <div
+                onClick={() => {
+                  if (seconds == 0) {
+                    toast({
+                      title: 'Appointment has not started yet',
+                      duration: 1500,
+                      variant: 'destructive',
+                    });
+                    return;
+                  }
+                  handlePrint();
+                }}
+                className='h-40 w-48 gap-1 rounded-xl cursor-pointer group border border-border flex flex-col items-center justify-center'
+              >
                 <div className='h-20 w-20  rounded-full flex items-center justify-center bg-primary/10 text-primary dark:bg-green-500/20 dark:text-green-200 duration-100 ease-linear'>
                   <Hospital className=' h-10 w-10 text-primary dark:text-green-200' />
                 </div>
@@ -260,7 +307,17 @@ const WorkAppointmentDialog = ({ open, setOpen, appointment }: Props) => {
                 </p>
               </div>
               <div
-                onClick={() => setIsOpenUploadPrescriptionDialog(true)}
+                onClick={() => {
+                  if (seconds == 0) {
+                    toast({
+                      title: 'Appointment has not started yet',
+                      duration: 1500,
+                      variant: 'destructive',
+                    });
+                    return;
+                  }
+                  setIsOpenUploadPrescriptionDialog(true);
+                }}
                 className='h-40 w-48 gap-1 rounded-xl cursor-pointer group border border-border flex flex-col items-center justify-center'
               >
                 <div className='h-20 w-20  rounded-full flex items-center justify-center bg-primary/10 text-primary dark:bg-green-500/20 dark:text-green-200 duration-100 ease-linear'>
@@ -311,6 +368,14 @@ const WorkAppointmentDialog = ({ open, setOpen, appointment }: Props) => {
               {formatTime(seconds)}
             </Button>
           )}
+        </div>
+        <div className='hidden'>
+          <HospitalReferall
+            clinic={appointment?.clinic}
+            doctor={appointment?.employee}
+            patient={appointment?.patient}
+            ref={componentRef}
+          />
         </div>
       </DialogContent>
       <CreatePrescriptionDialog

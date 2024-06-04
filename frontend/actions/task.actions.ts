@@ -31,10 +31,14 @@ export const createTask = async ({
   return res.data;
 };
 
-export const getTasks = async (): Promise<TTask[]> => {
+export const getTasks = async ({
+  filter,
+}: {
+  filter?: string;
+}): Promise<TTask[]> => {
   const data = await getCurrentUser();
   const res = await axios.get(
-    `http://localhost:8080/api/task/get-tasks/${data?.user?.clinicId}`
+    `http://localhost:8080/api/task/get-tasks/${data?.user?.clinicId}?filter=${filter}`
   );
 
   return res.data.tasks;

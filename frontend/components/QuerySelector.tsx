@@ -52,7 +52,10 @@ const QuerySelector = ({
     }
   };
   return (
-    <Select onValueChange={(e) => handleSelect(e)}>
+    <Select
+      defaultValue={searchParams?.get(queryKey) || undefined}
+      onValueChange={(e) => handleSelect(e)}
+    >
       <SelectTrigger className={otherClasses}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>

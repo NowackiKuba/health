@@ -34,17 +34,26 @@ import CreateTaskDialog from '../dialogs/CreateTaskDialog';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { deleteTask, getTasks } from '@/actions/task.actions';
 import { format } from 'date-fns';
-import { getPriorityData } from '@/utils';
+import { getPriorityData, removeKeysFromQuery } from '@/utils';
 import EditTaskDialog from '../dialogs/EditTaskDialog';
 import TaskDetailsDialog from '../dialogs/TaskDetailsDialog';
 import TaskCard from '../cards/TaskCard';
 import { toast } from '../ui/use-toast';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { FcExport, FcImport } from 'react-icons/fc';
 
 const TasksPage = () => {
+  const searchParams = useSearchParams();
   const { data: tasks, isLoading } = useQuery({
-    queryKey: ['getTasks'],
-    queryFn: async () => await getTasks(),
+    queryKey: ['getTasks', { filter: searchParams?.get('filter') }],
+    queryFn: async () =>
+      await getTasks({
+        filter: searchParams?.get('filter')
+          ? searchParams?.get('filter')!
+          : undefined,
+      }),
   });
+  const router = useRouter();
   const [view, setView] = useState<'list' | 'grid'>('list');
   const [isOpenCreate, setIsOpenCreate] = useState<boolean>(false);
   const [isOpenEdit, setIsOpenEdit] = useState<boolean>(false);
@@ -82,39 +91,75 @@ const TasksPage = () => {
         <p className='text-2xl font-semibold'>Tasks</p>
         <div className='flex items-center gap-2'>
           <Button
-            className='flex items-center gap-2'
+            className='hidden sm:flex items-center gap-2'
             onClick={() => setIsOpenCreate(true)}
           >
             <CirclePlus className='h-5 w-5' />
             <p>Create Task</p>
           </Button>
-          <Button
-            variant={'primary-outline'}
-            className='flex items-center gap-2'
-          >
-            <p>Actions</p>
-            <ChevronDown className='h-5 w-5' />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant={'primary-outline'}
+                className='flex items-center gap-2'
+              >
+                <p>Actions</p>
+                <ChevronDown className='h-5 w-5' />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem className='sm:hidden flex items-center gap-2 cursor-pointer'>
+                <CirclePlus className='h-5 w-5' />
+                <p>Create Task</p>
+              </DropdownMenuItem>
+              <DropdownMenuItem className='flex items-center gap-2 cursor-pointer'>
+                <FcImport className='h-5 w-5' />
+                <p>Import from CSV</p>
+              </DropdownMenuItem>
+              <DropdownMenuItem className='flex items-center gap-2 cursor-pointer'>
+                <FcExport className='h-5 w-5' />
+                <p>Export to CSV</p>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-2 w-full'>
-          <Searchbar
-            route='/dashboard/tasks'
-            placeholder='Search for tasks'
-            iconPosition='left'
-            otherClasses='xl:max-w-[400px]'
-          />
-          <QuerySelector
-            placeholder='Filter'
-            queryKey='filter'
-            options={[
-              { key: 'high', value: 'High Priority' },
-              { key: 'medium', value: 'Medium Priority' },
-              { key: 'low', value: 'Low Priority' },
-            ]}
-            otherClasses='xl:max-w-[220px]'
-          />
+      <div className='flex md:flex-row flex-col md:items-center md:gap-0 gap-2  md:justify-between'>
+        <div className='flex items-center md:flex-row flex-col gap-2 w-full'>
+          <div className='flex items-center gap-2 w-full'>
+            <Searchbar
+              route='/dashboard/tasks'
+              placeholder='Search for tasks'
+              iconPosition='left'
+              otherClasses='xl:max-w-[400px] lg:max-w-[220px] md:max-w-[200px] w-full'
+            />
+            <QuerySelector
+              placeholder='Filter'
+              queryKey='filter'
+              options={[
+                { key: 'high', value: 'High Priority' },
+                { key: 'medium', value: 'Medium Priority' },
+                { key: 'low', value: 'Low Priority' },
+              ]}
+              otherClasses='xl:max-w-[220px] lg:max-w-[150px] md:max-w-[120px] w-full'
+            />
+            {searchParams?.get('filter') && (
+              <Button
+                className='flex items-center gap-2'
+                variant={'destructive-ghost'}
+                onClick={() => {
+                  const newUrl = removeKeysFromQuery({
+                    keysToRemove: ['filter'],
+                    params: searchParams.toString(),
+                  });
+                  router.push(newUrl, { scroll: false });
+                }}
+              >
+                <Trash />
+                <p>Remove Filters</p>
+              </Button>
+            )}
+          </div>
         </div>
         <div className='flex items-center gap-2'>
           <Button
@@ -238,7 +283,7 @@ const TasksPage = () => {
               </TableBody>
             </Table>
           ) : (
-            <div className='flex items-center gap-4 w-full flex-wrap'>
+            <div className='flex items-center gap-2 md:gap-4 w-full flex-wrap'>
               {tasks?.map((task) => (
                 <>
                   <TaskCard

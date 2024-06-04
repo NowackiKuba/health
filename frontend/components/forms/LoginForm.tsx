@@ -46,6 +46,11 @@ const LoginForm = () => {
           <Input
             onChange={(e) => setPassword(e.target.value)}
             type={isPasswordVisible ? 'text' : 'password'}
+            onKeyDown={(e) => {
+              if (password.length > 3 && e.key === 'Enter') {
+                handleLogIn({ email, password });
+              }
+            }}
           />
         </div>
         <Button

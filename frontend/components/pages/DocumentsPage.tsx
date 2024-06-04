@@ -33,6 +33,8 @@ import {
 import { toast } from '../ui/use-toast';
 import { useRouter } from 'next/navigation';
 import EditDocumentDialog from '../dialogs/EditDocumentDialog';
+import Link from 'next/link';
+import { FcDocument, FcExport, FcFile, FcImport } from 'react-icons/fc';
 
 const DocumentsPage = () => {
   const router = useRouter();
@@ -70,23 +72,44 @@ const DocumentsPage = () => {
         <p className='text-xl font-semibold'>Documents</p>
         <div className='flex items-center gap-2'>
           <Button
-            className='flex items-center gap-2'
+            className='hidden sm:flex items-center gap-2'
             onClick={() => setIsOpenUpload(true)}
           >
             <CirclePlus className='h-5 w-5' />
             <p>Upload Document</p>
           </Button>
-          <Button
-            variant={'primary-outline'}
-            className='flex items-center gap-2'
-          >
-            <p>Actions</p>
-            <ChevronDown className='h-5 w-5' />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Button
+                variant={'primary-outline'}
+                className='flex items-center gap-2'
+              >
+                <p>Actions</p>
+                <ChevronDown className='h-5 w-5' />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem
+                className='cursor-pointer sm:hidden flex items-center gap-2'
+                onClick={() => setIsOpenUpload(true)}
+              >
+                <CirclePlus />
+                <p>Upload Document</p>
+              </DropdownMenuItem>
+              <DropdownMenuItem className='cursor-pointer flex items-center gap-2'>
+                <FcImport />
+                <p>Import from CSV</p>
+              </DropdownMenuItem>
+              <DropdownMenuItem className='cursor-pointer flex items-center gap-2'>
+                <FcExport />
+                <p>Export to CSV</p>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       {documents ? (
-        <div className='w-full'>
+        <div className='md:flex hidden w-full'>
           <Table>
             <TableHeader>
               <TableRow>
@@ -131,12 +154,15 @@ const DocumentsPage = () => {
                             <Edit className='h-4 w-4' />
                             <p>Edit Document</p>
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className='flex items-center gap-2'
-                            onClick={() => router.push(document?.linkUrl)}
-                          >
-                            <ExternalLink className='h-4 w-4' />
-                            <p>See Details</p>
+                          <DropdownMenuItem className='flex items-center gap-2'>
+                            <Link
+                              href={document.linkUrl}
+                              target='_blank'
+                              className='flex items-center gap-2'
+                            >
+                              <ExternalLink className='h-4 w-4' />
+                              <p>See Details</p>
+                            </Link>
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
@@ -170,6 +196,25 @@ const DocumentsPage = () => {
           </p>
         </div>
       )}
+      <div className='md:hidden flex flex-row items-center justify-start w-full flex-wrap'>
+        {documents?.map((d) => (
+          <div
+            onClick={() => {
+              setSelectedDocument(d);
+            }}
+            onDoubleClick={() => {
+              router.push(d.linkUrl);
+            }}
+            className={`${
+              selectedDocument === d ? 'bg-blue-500/20 rounded-xl' : ''
+            } px-4 py-2 flex flex-col gap-2 items-center justify-center`}
+            key={d.id}
+          >
+            <FcFile className='sm:h-28 sm:w-28 h-20 w-20' />
+            <p className='max-w-28 truncate text-sm'>{d.title}</p>
+          </div>
+        ))}
+      </div>
       <UploadDocumentDialog open={isOpenUpload} setOpen={setIsOpenUpload} />
       <EditDocumentDialog
         open={isOpenEdit}

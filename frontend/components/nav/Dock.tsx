@@ -68,7 +68,7 @@ const Dock = () => {
           </div>
         </div>
       ) : (
-        <div className='absolute z-10 sm:flex hidden w-full xl:px-16 lg:px-20 md:px-8 pb-3 sm:px-2'>
+        <div className='absolute z-10 sm:flex hidden w-full xl:px-16 lg:px-20 md:px-8 lg:pb-3 sm:px-2'>
           <div className='w-full bg-black/10 dark:bg-gray-200/10 rounded-full py-1 flex items-center justify-center md:gap-5 lg:gap-8 xl:gap-12 gap-6'>
             {dockLinks.map((link) => {
               const Icon = link.icon;

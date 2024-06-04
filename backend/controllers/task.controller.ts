@@ -36,10 +36,34 @@ export const createTask: RequestHandler = async (req, res, next) => {
 export const getTasks: RequestHandler = async (req, res, next) => {
   try {
     const { clinicId } = req.params;
+    const { filter } = req.query;
+
+    let filterOptions = {};
+
+    if (filter) {
+      switch (filter) {
+        case 'high':
+          filterOptions = {
+            priority: 3,
+          };
+          break;
+        case 'medium':
+          filterOptions = {
+            priority: 2,
+          };
+          break;
+        case 'low':
+          filterOptions = {
+            priority: 1,
+          };
+          break;
+      }
+    }
 
     const tasks = await db.task.findMany({
       where: {
         clinicId,
+        ...filterOptions,
       },
       include: {
         assignedTo: true,

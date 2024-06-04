@@ -34,9 +34,29 @@ const EmployeeDetailsDialog = ({ open, setOpen, employeeId }: Props) => {
               </div>
             </AvatarFallback>
           </Avatar>
-          <p className='text-2xl font-semibold'>
+          <p className='text-2xl font-semibold mt-2'>
             {employee?.firstName} {employee?.lastName}
           </p>
+          <div className='flex flex-col gap-1 w-full text-sm text-gray-400'>
+            <div className='flex items-center gap-2 `'>
+              <p className='font-semibold'>Email:</p>
+              <p>{employee?.email}</p>
+            </div>
+            <div className='flex items-center gap-2 `'>
+              <p className='font-semibold'>Phone: </p>
+              <p>{employee?.phone || 'No Data'}</p>
+            </div>
+            <div className='flex items-center gap-2 `'>
+              <p className='font-semibold'>Room: </p>
+              <p>{employee?.room || 'No Data'}</p>
+            </div>
+            <div className='flex items-center gap-2 `'>
+              <p className='font-semibold'>Role: </p>
+              <p className='first-letter:uppercase'>
+                {employee?.role.toString().toLowerCase() || 'No Data'}
+              </p>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

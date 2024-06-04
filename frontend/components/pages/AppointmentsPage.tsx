@@ -61,6 +61,7 @@ import {
 } from '../ui/tooltip';
 import WorkAppointmentDialog from '../dialogs/WorkAppointmentDialog';
 import { toast } from '../ui/use-toast';
+import { FcExport, FcImport } from 'react-icons/fc';
 
 const AppointmentsPage = () => {
   const { data: clinic, isLoading: isLoadingClinic } = useQuery({
@@ -81,6 +82,7 @@ const AppointmentsPage = () => {
   const [view, setView] = useState<'history' | 'upcoming'>('upcoming');
   const [activeDoctor, setActiveDoctor] = useState<string>('');
   const [activePatient, setActivePatient] = useState<string>('');
+  const [activeSort, setActiveSort] = useState<string>('');
   const [selectedAppointment, setSelectedAppointment] =
     useState<TAppointment>();
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
@@ -146,25 +148,65 @@ const AppointmentsPage = () => {
   if (isLoading || isLoadingClinic) {
     return <p>loading</p>;
   }
+
+  const handleSelectPatient = (item: string) => {
+    if (activeSort === item) {
+      setActiveSort('');
+      const newUrl = removeKeysFromQuery({
+        keysToRemove: ['patient'],
+        params: searchParams.toString(),
+      });
+      router.push(newUrl, { scroll: false });
+    } else {
+      setActiveSort(item);
+      const newUrl = formUrlQuery({
+        key: 'patient',
+        value: item,
+        params: searchParams.toString(),
+      });
+      router.push(newUrl, { scroll: false });
+    }
+  };
   return (
     <div className='w-full flex flex-col gap-8'>
       <div className='flex items-center justify-between w-full'>
         <p className='text-2xl font-semibold'>Appointments</p>
         <div className='flex items-center gap-2'>
           <Button
-            className='flex items-center gap-2'
+            className='hidden sm:flex items-center gap-2'
             onClick={() => setIsOpenCreate(true)}
           >
             <CirclePlus className='h-5 w-5' />
             <p>Create Appointment</p>
           </Button>
-          <Button
-            variant={'primary-outline'}
-            className='flex items-center gap-2'
-          >
-            <p>Actions</p>
-            <ChevronDown className='h-5 w-5' />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant={'primary-outline'}
+                className='flex items-center gap-2'
+              >
+                <p>Actions</p>
+                <ChevronDown className='h-5 w-5' />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem
+                className='md:hidden flex items-center gap-2 cursor-pointer'
+                onClick={() => setIsOpenCreate(true)}
+              >
+                <CirclePlus className='h-5 w-5' />
+                <p>Create Employee</p>
+              </DropdownMenuItem>
+              <DropdownMenuItem className='flex items-center gap-2 cursor-pointer'>
+                <FcImport className='h-5 w-5' />
+                <p>Import from CSV</p>
+              </DropdownMenuItem>
+              <DropdownMenuItem className='flex items-center gap-2 cursor-pointer'>
+                <FcExport className='h-5 w-5' />
+                <p>Export to CSV</p>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       <div className='flex items-center lg:flex-row flex-col justify-start lg:justify-between w-full'>
@@ -173,9 +215,9 @@ const AppointmentsPage = () => {
             placeholder='Search for appointments'
             iconPosition='left'
             route='/dashboard/appointments'
-            otherClasses='xl:max-w-[400px] lg:w-full w-full'
+            otherClasses='xl:max-w-[400px] w-full lg:w-full sm:w-full'
           />
-          <Select defaultValue={searchParams?.get('doctorId')!}>
+          <Select defaultValue={searchParams?.get('doctorId') || ''}>
             <SelectTrigger className='w-full lg:max-w-[220px]'>
               <SelectValue placeholder='Select Doctor' />
             </SelectTrigger>
@@ -195,7 +237,7 @@ const AppointmentsPage = () => {
               ))}
             </SelectContent>
           </Select>
-          <Select>
+          <Select onValueChange={(e) => handleSelectPatient(e)}>
             <SelectTrigger className='w-full lg:max-w-[220px]'>
               <SelectValue placeholder='Select Patient' />
             </SelectTrigger>
@@ -217,7 +259,7 @@ const AppointmentsPage = () => {
             ]}
           />
         </div>
-        <div className='flex items-center gap-2 lg:justify-end justify-start lg:mt-0 mt-2 w-full'>
+        <div className='flex items-center gap-2 w-full lg:w-[250px] lg:justify-end justify-start lg:mt-0 mt-2'>
           <TooltipProvider>
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
@@ -226,7 +268,7 @@ const AppointmentsPage = () => {
                   variant={view === 'upcoming' ? 'default' : 'primary-outline'}
                   onClick={() => setView('upcoming')}
                 >
-                  <CalendarClock className='md:h-12 md:w-12 lg:h-5 lg:w-5' />
+                  <CalendarClock className='' />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Upcoming Appointments</TooltipContent>
@@ -240,7 +282,7 @@ const AppointmentsPage = () => {
                   variant={view === 'history' ? 'default' : 'primary-outline'}
                   onClick={() => setView('history')}
                 >
-                  <CalendarRange className=' sm:h-8 md:h-12 sm:w-8 md:w-12 lg:h-5 lg:w-5' />
+                  <CalendarRange className='' />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Appointments History</TooltipContent>
@@ -266,19 +308,30 @@ const AppointmentsPage = () => {
               <TableRow
                 key={appointment.id}
                 className={`w-full ${
-                  view === 'history'
-                    ? format(appointment?.date, 'dd.MM.yyyy') <=
+                  view === 'upcoming'
+                    ? format(appointment.date, 'dd.MM.yyyy') >=
                       format(new Date(), 'dd.MM.yyyy')
-                      ? ''
+                      ? format(appointment.date, 'dd.MM.yyyy') ==
+                        format(new Date(), 'dd.MM.yyyy')
+                        ? +appointment.hour.split(':')[0] >
+                          new Date().getHours()
+                          ? ''
+                          : 'hidden'
+                        : ''
                       : 'hidden'
-                    : format(appointment?.date, 'dd.MM.yyyy') >=
-                        format(new Date(), 'dd.MM.yyyy') ||
-                      (format(appointment?.date, 'dd.MM.yyyy') ==
-                        format(new Date(), 'dd.MM.yyyy') &&
-                        appointment?.hour > format(new Date(), 'HH:mm'))
-                    ? ''
-                    : 'hidden'
-                } `}
+                    : view === 'history'
+                    ? format(appointment.date, 'dd.MM.yyyy') <=
+                      format(new Date(), 'dd.MM.yyyy')
+                      ? format(appointment.date, 'dd.MM.yyyy') ==
+                        format(new Date(), 'dd.MM.yyyy')
+                        ? +appointment.hour.split(':')[0] <
+                          new Date().getHours()
+                          ? ''
+                          : 'hidden'
+                        : ''
+                      : 'hidden'
+                    : ''
+                }`}
               >
                 <TableCell>{appointment.appointmentType.toString()}</TableCell>
                 <TableCell>{appointment.appointmentReason}</TableCell>

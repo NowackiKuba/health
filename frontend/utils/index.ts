@@ -51,7 +51,7 @@ export const removeKeysFromQuery = ({
 
 export const getPriorityData = (priorty: number) => {
   switch (priorty) {
-    case 1: {
+    case 3: {
       return {
         text: 'High',
         textColor: 'text-red-200 dark:text-red-500',
@@ -62,12 +62,12 @@ export const getPriorityData = (priorty: number) => {
     case 2: {
       return {
         text: 'Medium',
-        textColor: 'text-orange-200 dark:text-orange-500',
-        bg: 'bg-orange-500/10 dark:bg-orange-500/20',
+        textColor: 'text-yellow-200 dark:text-yellow-500',
+        bg: 'bg-yellow-500/10 dark:bg-yellow-500/20',
         icon: FcMediumPriority,
       };
     }
-    case 3: {
+    case 1: {
       return {
         text: 'Low',
         textColor: 'text-green-200 dark:text-green-500',

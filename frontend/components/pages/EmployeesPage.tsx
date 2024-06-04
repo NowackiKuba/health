@@ -310,7 +310,7 @@ const EmployeesPage = () => {
           />
         </div>
       </div>
-      <div className='flex md:hidden  sm:flex-row flex-col flex-wrap sm:items-center items-start sm:gap-2 gap-1 w-full'>
+      <div className='flex md:hidden sm:flex-row flex-col flex-wrap sm:items-center items-start sm:gap-2 gap-1 w-full'>
         {data?.employees?.map((employee) => (
           <div
             onClick={() => {

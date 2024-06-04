@@ -27,7 +27,7 @@ const TaskCard = ({
   const { bg, icon, text, textColor } = getPriorityData(task?.priority);
   const Icon = icon;
   return (
-    <div className='xl:w-[334px] pt-3 pb-2 rounded-xl bg-secondary flex flex-col gap-2 px-2'>
+    <div className='w-full md:w-[334px] pt-3 pb-2 rounded-xl bg-secondary flex flex-col gap-2 px-2'>
       <div
         className={`h-20 w-20 rounded-full ${bg} flex items-center justify-center`}
       >

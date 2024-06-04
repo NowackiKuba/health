@@ -77,15 +77,18 @@ export const editAppointment = async ({
   appointmentReason: string;
   appointmentId: string;
 }) => {
-  const res = await axios.post('http://localhost:8080/api/appointment/edit', {
-    appointmentId,
-    employeeId,
-    patientId,
-    date,
-    note,
-    appointmentType,
-    appointmentReason,
-  });
+  const res = await axios.patch(
+    `http://localhost:8080/api/appointment/edit/:${appointmentId}`,
+    {
+      appointmentId,
+      employeeId,
+      patientId,
+      date,
+      note,
+      appointmentType,
+      appointmentReason,
+    }
+  );
 
   return res.data;
 };
